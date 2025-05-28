@@ -2,6 +2,8 @@
 Este proyecto utiliza Vite como herramienta de construcción.
 
 # Estructura de carpetas (Atomic Design)
+
+```bash
 src/
 │
 ├── assets/                # Archivos estáticos (imágenes, fuentes, etc.)
@@ -57,6 +59,7 @@ src/
 │   └── ...                
 │
 └── App.tsx                # Componente raíz de la aplicación
+
 
 ## Comandos Esenciales
 A continuación, se detallan los comandos más comunes:
