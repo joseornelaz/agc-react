@@ -4,30 +4,31 @@ on:
   push:
     branches: [ develop ]
 
-
 env:
   AWS_REGION: us-east-2
+  AWS_ROLE: arn:aws:s3:::mi-app-react
   S3_BUCKET: desplieguegit
 
 permissions:
   id-token: write
-  contents: write
+  contents: read
 
 jobs:
     build-and-deploy:
         name: Deploy ${{ github.ref_name }} to develop
         runs-on: ubuntu-latest
-        
+
         steps:
         - name: Checkout code
           uses: actions/checkout@v4
 
         - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v3
+          uses: aws-actions/configure-aws-credentials@v4.1.0
           with:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
+            role-to-assume: ${{ env.AWS_ROLE }}
 
         # Instala dependencias (ajusta según tu proyecto)
         - name: Install dependencies
