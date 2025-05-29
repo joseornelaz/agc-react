@@ -5,9 +5,9 @@ on:
     branches: [ develop ]
 
 
-# env:
-#   AWS_REGION: us-east-2
-#   S3_BUCKET: desplieguegit
+env:
+  AWS_REGION: us-east-2
+  S3_BUCKET: desplieguegit
 
 jobs:
     build-and-deploy:
@@ -22,7 +22,12 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4
 
-        
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v3
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
 
         # Instala dependencias (ajusta según tu proyecto)
         - name: Install dependencies
@@ -50,9 +55,9 @@ jobs:
           uses: actions/deploy-pages@v4
 
 
-        # - name: Copy to S3
-        #   run: |
-        #     aws s3 sync ./dist s3://${{env.S3_BUCKET}} --delete --only-show-errors
+        - name: Copy to S3
+          run: |
+            aws s3 sync ./dist s3://${{env.S3_BUCKET}} --delete --only-show-errors
 
         # Publica o despliega (ajusta este paso según tu flujo)
         - name: Deploy to Develop Environment
