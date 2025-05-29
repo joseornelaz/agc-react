@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@constants': path.resolve(__dirname, './src/types/index.tsx'),
       '@components': path.resolve(__dirname,'./src/components/index.tsx'),
-    }
+    },
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
   }
 })

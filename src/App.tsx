@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 
 function App() {  
 
-  const [darkMode, setDarkMode] = React.useState(false);
+  const [darkMode, _setDarkMode] = React.useState(false);
 
   const theme = createTheme({
     palette: {

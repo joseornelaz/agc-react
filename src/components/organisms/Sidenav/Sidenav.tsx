@@ -55,11 +55,11 @@ type SidenavProps = {
     onClose: () => void;
   };
 
-const Sidenav = ({ isOpen, onClose }: SidenavProps) => {
+const Sidenav = ({ isOpen }: SidenavProps) => {
   const [expandedItems, setExpandedItems] = React.useState<string[]>(['Main items', 'Analytics']);
 
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isClosing, setIsClosing] = React.useState(false);
+  const [_mobileOpen, setMobileOpen] = React.useState(false);
+  const [_isClosing, setIsClosing] = React.useState(false);
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -72,11 +72,11 @@ const Sidenav = ({ isOpen, onClose }: SidenavProps) => {
     setIsClosing(false);
   };
 
-  const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
-  };
+  // const handleDrawerToggle = () => {
+  //   if (!isClosing) {
+  //     setMobileOpen(!mobileOpen);
+  //   }
+  // };
 
   const handleExpandClick = (text: string) => {
     setExpandedItems(prev => 
