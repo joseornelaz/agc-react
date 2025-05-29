@@ -9,15 +9,15 @@ env:
   AWS_REGION: us-east-2
   S3_BUCKET: desplieguegit
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
     build-and-deploy:
         name: Deploy ${{ github.ref_name }} to develop
         runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            pages: write
-            id-token: write
-
+        
         steps:
         - name: Checkout code
           uses: actions/checkout@v4
