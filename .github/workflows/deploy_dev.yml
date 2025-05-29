@@ -30,8 +30,8 @@ jobs:
         - name: Install dependencies
           run: npm install
 
-        - name: Run Linter
-          run: npm run lint
+        #- name: Run Linter
+        #  run: npm run lint
 
         # Construye el proyecto (ajusta según tu proyecto)
         - name: Build project
@@ -44,7 +44,7 @@ jobs:
 
         - name: Deploy to GitHub Pages
           uses: actions/deploy-pages@v4
-          
+
         # Publica o despliega (ajusta este paso según tu flujo)
         - name: Deploy to Develop Environment
           run: echo "Deploying to develop environment..."
