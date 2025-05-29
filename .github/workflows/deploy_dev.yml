@@ -50,9 +50,9 @@ jobs:
           uses: actions/deploy-pages@v4
 
 
-        - name: Copy to S3
-          run: |
-            aws s3 sync ./dist s3://${{env.S3_BUCKET}} --delete --only-show-errors
+        # - name: Copy to S3
+        #   run: |
+        #     aws s3 sync ./dist s3://${{env.S3_BUCKET}} --delete --only-show-errors
 
         # Publica o despliega (ajusta este paso según tu flujo)
         - name: Deploy to Develop Environment
