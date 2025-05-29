@@ -44,10 +44,11 @@ import {
 // ]);
 export const AppRouting = createBrowserRouter([
     {
+        path: '/',
         Component: App,
         children: [
             {
-                path: "/",
+                path: '/',
                 Component: MainTemplate,
                 children: [
                     {
