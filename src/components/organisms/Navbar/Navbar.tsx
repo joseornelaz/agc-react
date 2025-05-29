@@ -166,7 +166,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed" sx={{ backgroundColor: 'red' }}>
+      <AppBar position="fixed">
         <Toolbar>
           <Box sx={{ display: { xs: 'flex', md: 'none', sm: 'none' } }}>
             <IconButton

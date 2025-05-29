@@ -21,7 +21,6 @@ export const AppRouting = createHashRouter([
         Component: MainTemplate,
         children: [
           {
-            //index: true, // Equivalente a path: ""
             path: AppRoutingPaths.BLANK,
             Component: Home
           },
@@ -33,7 +32,6 @@ export const AppRouting = createHashRouter([
             path: AppRoutingPaths.MIRUTA,
             Component: MiRuta
           },
-          // Ruta para manejar 404 en GitHub Pages
           {
             path: AppRoutingPaths.NOTFOUND,
             Component: NotFound // Crea este componente
