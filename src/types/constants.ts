@@ -7,6 +7,7 @@ export const AppRoutingPaths = {
     CALIFICACIONES: "/calificaciones",
     LOGIN: "/login",
     ERROR: "/error",
+    NOTFOUND: '*'
 } as const;
 
 export type AppRoutingPaths = typeof AppRoutingPaths;

@@ -1,7 +1,8 @@
 import App from "./App";
 import { AppRoutingPaths } from "@constants";
-import { createHashRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 // createBrowserRouter
+// createHashRouter
 import { 
     Calificaciones,
     Home, 
@@ -10,59 +11,63 @@ import {
     NotFound
 } from "@components";
 
-export const AppRouting = createHashRouter([
-  {
-    path: '/',
-    element: <App />,
-    children: [
-      {
-        path: '/',
-        element: <MainTemplate />,
-        children: [
-          {
-            index: true, // Equivalente a path: ""
-            element: <Home />
-          },
-          {
-            path: AppRoutingPaths.CALIFICACIONES,
-            element: <Calificaciones />
-          },
-          {
-            path: AppRoutingPaths.MIRUTA,
-            element: <MiRuta />
-          },
-          // Ruta para manejar 404 en GitHub Pages
-          {
-            path: '*',
-            element: <NotFound /> // Crea este componente
-          }
-        ]
-      }
-    ]
-  }
-]);
 // export const AppRouting = createHashRouter([
-//     {
-//         Component: App,
+//   {
+//     path: '/',
+//     element: <App />,
+//     children: [
+//       {
+//         path: '/',
+//         element: <MainTemplate />,
 //         children: [
-//             {
-//                 path: "/",
-//                 Component: MainTemplate,
-//                 children: [
-//                     {
-//                         path: AppRoutingPaths.BLANK,
-//                         Component: Home,
-//                     },
-//                     {
-//                         path: AppRoutingPaths.CALIFICACIONES,
-//                         Component: Calificaciones,
-//                     },
-//                     {
-//                         path: AppRoutingPaths.MIRUTA,
-//                         Component: MiRuta,
-//                     },
-//                 ]
-//             },
-//         ],
-//     }
+//           {
+//             index: true, // Equivalente a path: ""
+//             element: <Home />
+//           },
+//           {
+//             path: AppRoutingPaths.CALIFICACIONES,
+//             element: <Calificaciones />
+//           },
+//           {
+//             path: AppRoutingPaths.MIRUTA,
+//             element: <MiRuta />
+//           },
+//           // Ruta para manejar 404 en GitHub Pages
+//           {
+//             path: '*',
+//             element: <NotFound /> // Crea este componente
+//           }
+//         ]
+//       }
+//     ]
+//   }
 // ]);
+export const AppRouting = createBrowserRouter([
+    {
+        Component: App,
+        children: [
+            {
+                path: "/",
+                Component: MainTemplate,
+                children: [
+                    {
+                        path: AppRoutingPaths.BLANK,
+                        Component: Home,
+                    },
+                    {
+                        path: AppRoutingPaths.CALIFICACIONES,
+                        Component: Calificaciones,
+                    },
+                    {
+                        path: AppRoutingPaths.MIRUTA,
+                        Component: MiRuta,
+                    },
+                    {
+                        path: AppRoutingPaths.NOTFOUND,
+                        Component: NotFound
+                    }
+                ]
+            },
+        ],
+    }
+]);
