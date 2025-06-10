@@ -14,6 +14,7 @@ import {
 
 import { LoginPage } from "./components/pages/Login/Login";
 import { ProtectedRoute } from "./components/templates/ProtectedRoute";
+import PreguntasFrecuentes from "./components/pages/PreguntasFrecuentes/PreguntasFrecuentes";
 
 export const AppRouting = createHashRouter([
   {
@@ -49,6 +50,14 @@ export const AppRouting = createHashRouter([
             ]
           }
         ]
+      },
+      {
+        path: AppRoutingPaths.PREGUNTAS_FRECUENTES,
+        Component: PreguntasFrecuentes
+      },
+      {
+        path: AppRoutingPaths.AYUDA_EXTERIOR,
+        Component: PreguntasFrecuentes
       },
       {
         path: '*',

@@ -16,15 +16,18 @@ import { Avatar } from '../../atoms/Avatar/Avatar';
 import { Typography } from '../../atoms/Typography/Typography';
 
 import contactanos from '../../../assets/contactanos.png';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutingPaths } from '@constants';
 
 export const LoginPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [isOpen, setIsOpen] = React.useState(false);
+  const Navigation = useNavigate();
 
   const accessLogin = [
     { id: 'manual-induccion', icon: ManualInduccion, label: 'Manual de Inducción', action: () => console.log('Manual de Inducción') },
-    { id: 'faqs', icon: FAQS, label: 'Preguntas frecuentes', action: () => console.log('Preguntas frecuentes') },
+    { id: 'faqs', icon: FAQS, label: 'Preguntas frecuentes', action: () => Navigation(AppRoutingPaths.PREGUNTAS_FRECUENTES) },
     { id: 'contacto', icon: Contacto, label: 'Contacto', action: () => setIsOpen(true) },
     { id: 'ayuda', icon: Help, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
@@ -32,7 +35,6 @@ export const LoginPage = () => {
   return (
     // maxWidth={isMobile ? 'xs' : 'lg'}
     <Container component="main" maxWidth='xs'>
-      
       {
         isMobile 
         ?

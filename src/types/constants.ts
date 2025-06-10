@@ -8,14 +8,15 @@ export const AppRoutingPaths = {
     LOGIN: "/login",
     ERROR: "/error",
     TODO: "/todo",
+    PREGUNTAS_FRECUENTES: "/faqs",
+    AYUDA_EXTERIOR: "/help-ext",
     NOTFOUND: '*'
 } as const;
 
 export type AppRoutingPaths = typeof AppRoutingPaths;
 
-// export const YACHTS_ENDPOINTS = {
-//     GET_ALL: '/page/yachts-list/Classic',
-//     GET_BY_ID: '/page/yachts-by-id/'
+// export const LOGIN_ENDPOINTS = {
+//     POST_LOGIN: '/login',
 // }
 
-// export type YACHTS_ENDPOINTS = typeof YACHTS_ENDPOINTS;
+// export type LOGIN_ENDPOINTS = typeof LOGIN_ENDPOINTS;
