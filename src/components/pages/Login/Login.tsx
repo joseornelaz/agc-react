@@ -24,8 +24,8 @@ export const LoginPage = () => {
 
   const accessLogin = [
     { id: 'manual-induccion', icon: ManualInduccion, label: 'Manual de Inducción', action: () => console.log('Manual de Inducción') },
-    { id: 'faqs', icon: FAQS, label: 'Preguntas frecuentes', action: () => setIsOpen(true) },
-    { id: 'contacto', icon: Contacto, label: 'Contacto', action: () => console.log('Contacto') },
+    { id: 'faqs', icon: FAQS, label: 'Preguntas frecuentes', action: () => console.log('Preguntas frecuentes') },
+    { id: 'contacto', icon: Contacto, label: 'Contacto', action: () => setIsOpen(true) },
     { id: 'ayuda', icon: Help, label: 'Ayuda', action: () => console.log('Ayuda') },
   ];
 
