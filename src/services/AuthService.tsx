@@ -5,7 +5,7 @@ export const useAuthLogin = async (credentials: LoginCredentials): Promise<AuthR
     return await apiClient.post<AuthResponse>('/auth/login', credentials);
 };
 
-export const useLogout = async (id: number): Promise<boolean> => {
+export const useLogout = async (_id: number): Promise<boolean> => {
   // await apiClient.post<void>(`/auth/logout/${id}`);
   return true;
 };

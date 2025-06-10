@@ -1,5 +1,5 @@
 import { Box, Typography, Button } from "@mui/material";
-import { InputText } from "../../atoms/Input/Input";
+// import { InputText } from "../../atoms/Input/Input";
 
 import Logo from '../../../assets/logo_ag.svg';
 

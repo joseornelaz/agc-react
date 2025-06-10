@@ -11,7 +11,7 @@ const ToDo: React.FC = () => {
     const queryClient = useQueryClient();
     const [id, setId] = React.useState(0);
     const [title, setTitle] = React.useState('');
-    const { data: rows, isLoading, isError, error } = useGetTodos();
+    const { data: rows } = useGetTodos();
     const [editingTodo, setEditingTodo] = React.useState<Todo | null>(null);
     
     const handleSubmit = () => {
@@ -75,7 +75,7 @@ const ToDo: React.FC = () => {
           // Retornar contexto con snapshot
           return { previousTodos };
         },
-        onError: (err, variables, context) => {
+        onError: (err, _variables, context) => {
           // Revertir al snapshot en caso de error
           if (context?.previousTodos) {
             queryClient.setQueryData(['todos'], context.previousTodos);
