@@ -1,6 +1,7 @@
 export interface LoginCredentials {
-  email: string
-  password: string
+  email: string;
+  password: string;
+  username?: string; // Optional, used for login
 }
 
 export interface User {
