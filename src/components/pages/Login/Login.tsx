@@ -19,7 +19,7 @@ import contactanos from '../../../assets/contactanos.png';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutingPaths } from '@constants';
 
-export const LoginPage = () => {
+const LoginPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [isOpen, setIsOpen] = React.useState(false);
@@ -87,3 +87,5 @@ export const LoginPage = () => {
     </Container> 
   );
 };
+
+export default LoginPage;
