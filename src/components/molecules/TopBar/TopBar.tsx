@@ -6,14 +6,17 @@ import { LeftCircle } from "../../../assets/icons";
 
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import { useAuth } from "../../../hooks";
 
 type TopBarProps = {
+  titleScreen?: string;
   isExternal?: boolean;
   onBack?: () => void;
 };
 
-export const TopBar: React.FC<TopBarProps> = ({isExternal, onBack}) => {
-
+export const TopBar: React.FC<TopBarProps> = ({titleScreen, isExternal, onBack}) => {
+  const { user } = useAuth();
+  
   return (
     <AppBar
         position="fixed"
@@ -22,20 +25,20 @@ export const TopBar: React.FC<TopBarProps> = ({isExternal, onBack}) => {
       >
         {
           isExternal ? (
-            <Toolbar>
+            <Toolbar sx={{ paddingLeft: '8px', paddingRight: '8px' }}>
               <IconButton onClick={onBack}>
                 <DsSvgIcon component={LeftCircle} color='primary' />
               </IconButton>
               <Typography component="h4" variant="h4" sxProps={{ ml: '2px' }}>
-                Preguntas Frecuentes
+                { titleScreen }
               </Typography>
             </Toolbar>
           ) : (
-            <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Toolbar sx={{ justifyContent: "space-between", paddingLeft: '8px', paddingRight: '8px' }}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Avatar alt="Martin SM" src="" width={48} height={48} />
+                <Avatar alt={ user?.name } src="" width={48} height={48} />
                 <Typography component="h4" variant="h4" sxProps={{ ml: 1 }}>
-                  Martin SM
+                  { user?.name }
                 </Typography>
               </Box>
               <Box>
