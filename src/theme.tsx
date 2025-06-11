@@ -21,6 +21,7 @@ const theme = createTheme({
     grey: {
       50: '#E6EFFC',      
       100: '#7B8186',
+      200: '#758FA8',
       500: '#231F20',
     },
     text: {
@@ -59,6 +60,11 @@ const theme = createTheme({
       fontSize: '16px',
       lineHeight: '24px',
     },
+    subtitle1: {
+      fontWeight: 500,
+      fontSize: '16px',
+      lineHeight: '24px',
+    },
   },
   components: {
     MuiDrawer: {
@@ -67,6 +73,25 @@ const theme = createTheme({
           borderRight: 'none',
           boxShadow: '0 0 10px rgba(0,0,0,0.1)',
         },
+      },
+    },
+    MuiAccordion: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          border: `1px solid ${theme.palette.primary.main}`,
+          borderRadius: '4px',
+          marginBottom: theme.spacing(3),
+          '&:before': {
+            display: 'none',
+          },
+          boxShadow: 'none',
+          '&.Mui-expanded': {
+            margin: theme.spacing(3, 0),
+          },
+          '&.Mui-disabled': {
+            borderColor: theme.palette.action.disabled,
+          },
+        }),
       },
     },
   },

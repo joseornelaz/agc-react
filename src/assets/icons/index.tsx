@@ -70,3 +70,7 @@ export { default as Trash } from './Trash.svg?react';
 export { default as User } from './User.svg?react';
 export { default as Users } from './Users.svg?react';
 export { default as X } from './X.svg?react';
+
+
+// Iconos de navegación
+export { default as LeftCircle } from './LeftCircle.svg?react';

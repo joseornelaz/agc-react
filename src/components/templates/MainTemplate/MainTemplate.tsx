@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import { Navbar } from "../../organisms";
 import Sidenav from "../../organisms/Sidenav/Sidenav";
 
-const MainTemplate = () => {
+const MainTemplate: React.FC = () => {
     const [isSidenavOpen, setIsSidenavOpen] = React.useState(false);
 
     return (
