@@ -3,18 +3,17 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { TopBar } from "../../molecules/TopBar/TopBar";
 // import { BottomBar } from "../../molecules/BottomBar/BottomBar";
 import { useNavigate } from "react-router-dom";
-import { AppRoutingPaths } from "@constants";
+import { AppRoutingPaths, TitleScreen } from "@constants";
 import { AccordionPregunta } from "../../organisms/AccordionPregunta/AccordionPregunta";
-
 
 const PreguntasFrecuentes: React.FC = () => {
   const navigate = useNavigate();
   const onBack = () => navigate(AppRoutingPaths.HOME);
 
   return (
-    <Box sx={{ pt: 7, pb: 7 }}>
-      <TopBar isExternal={true} onBack={onBack} />
-      <Container sx={{ mt: 2 }} maxWidth='xs'>
+    <>
+    <Container maxWidth='xs' sx={{ pt: 7, pb: 7 }}>
+      <TopBar isExternal={true} onBack={onBack} titleScreen={TitleScreen.PREGUNTAS_FRECUENTES}  />
         <Box
           sx={{
             display: "flex",
@@ -30,12 +29,10 @@ const PreguntasFrecuentes: React.FC = () => {
           </Typography>
         </Box>
 
-        <AccordionPregunta titleDivider="Generales" preguntas={["1", "2", "3", "4"]} />
-
-        
-      </Container>
-      {/* <BottomBar /> */}
-    </Box>
+        <AccordionPregunta titleDivider="Generales" preguntas={["1", "2", "3", "4","12", "22", "23"]} />
+    </Container>
+    {/* <BottomBar /> */}
+    </>
   );
 };
 
