@@ -3,17 +3,7 @@ import { AppRoutingPaths } from "@constants";
 import { createHashRouter } from "react-router-dom";
 // createBrowserRouter
 // createHashRouter
-import { 
-    Calificaciones,
-    Home, 
-    LoginPage,
-    MainTemplate, 
-    MiRuta,
-    PreguntasFrecuentes,
-    NotFound,
-    ToDo
-} from "@components";
-
+import * as Component from "@components";
 import { ProtectedRoute } from "./components/templates/ProtectedRoute";
 
 export const AppRouting = createHashRouter([
@@ -23,45 +13,57 @@ export const AppRouting = createHashRouter([
     children: [
       {
         path: AppRoutingPaths.LOGIN,
-        Component: LoginPage,
+        Component: Component.LoginPage,
       },
       {
         Component: ProtectedRoute,
         children: [
           {
-            Component: MainTemplate, // Layout para las rutas protegidas
+            Component: Component.MainTemplate, // Layout para las rutas protegidas
             children: [
               {
                 path: AppRoutingPaths.BLANK,
-                Component: Home
+                Component: Component.Home
               },
               {
                 path: AppRoutingPaths.CALIFICACIONES,
-                Component: Calificaciones
+                Component: Component.Calificaciones
               },
               {
                 path: AppRoutingPaths.MIRUTA,
-                Component: MiRuta
+                Component: Component.MiRuta
               },
               {
-                path: AppRoutingPaths.TODO,
-                Component: ToDo
+                path: AppRoutingPaths.SERVICIOS_ESCOLORES,
+                Component: Component.ServiciosEscolares
               },
+              {
+                path: AppRoutingPaths.PREGUNTAS_FRECUENTES_INT,
+                Component: Component.PreguntasFrecuentes
+              },
+              {
+                path: AppRoutingPaths.CALENDARIO,
+                Component: Component.Calendario
+              },
+              {
+                path: AppRoutingPaths.PLAN_ESTUDIOS,
+                Component: Component.PlanEstudio
+              }
             ]
           }
         ]
       },
       {
         path: AppRoutingPaths.PREGUNTAS_FRECUENTES,
-        Component: PreguntasFrecuentes
+        Component: Component.PreguntasFrecuentes
       },
       {
         path: AppRoutingPaths.AYUDA_EXTERIOR,
-        Component: PreguntasFrecuentes
+        Component: Component.AyudaLogin
       },
       {
-        path: '*',
-        Component: NotFound
+        path: AppRoutingPaths.NOTFOUND,
+        Component: Component.NotFound
       }
     ]
   }

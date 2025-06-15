@@ -5,6 +5,7 @@ const theme = createTheme({
     mode: 'light',
     primary: {
       main: '#0C4D88',
+      "300": '#005A9B'
     },
     secondary: {
       main: '#dc004e',
@@ -16,7 +17,7 @@ const theme = createTheme({
       main: "#D9A514"
     },
     success: {
-      main: "#D9A514"
+      main: "#1F7B5C"
     },
     grey: {
       50: '#E6EFFC',      
@@ -67,6 +68,16 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+        containedWarning: {
+          color: '#fff'
+        }
+      },
+    },
     MuiDrawer: {
       styleOverrides: {
         paper: {
@@ -94,6 +105,59 @@ const theme = createTheme({
         }),
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        // Estas serán las props por defecto para todos los TextField
+        variant: 'outlined',
+        fullWidth: true,
+        size: 'medium',
+        autoComplete: 'new-password',
+      },
+      styleOverrides: {
+        root: ({theme}) => ({
+          // Estilos globales para TextField
+          marginBottom: '1rem',
+          '& .MuiOutlinedInput-root': {
+            // Estilos específicos para el outlined variant
+            borderRadius: '4px',
+          },
+          '& .MuiInputLabel-root': {
+            // Estilos para el label
+            transform: 'translate(14px, 14px) scale(1)',
+            '&.Mui-focused': {
+              transform: 'translate(14px, -9px) scale(0.75)',
+            },
+            '&.MuiFormLabel-filled': {
+              transform: 'translate(14px, -9px) scale(0.75)',
+            },
+          },
+          '& .Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root': {
+            color: theme.palette.primary.light,
+          },
+          '& .MuiInputAdornment-root .MuiSvgIcon-root': {
+            color: theme.palette.text.secondary,
+          },
+        }),
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        input: {
+          padding: '14px',
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: ({theme}) => ({
+          marginTop: '16px',
+          marginBottom: '16px',
+          '&::before, &::after': {
+            borderColor: theme.palette.primary.main,
+          }
+        })
+      }
+    }
   },
   breakpoints: {
     values: {

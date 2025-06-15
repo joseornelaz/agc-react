@@ -1,21 +1,17 @@
-import React, { createContext, useContext, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthLogin as loginApi, useLogout as logoutApi } from '../services/AuthService';
 import type { User } from '@constants';
-import { checkAuthStatus, cleanStorage, getAuthModel, setAuthModel } from '../hooks/useLocalStorage';
+import { checkAuthStatus, cleanStorage, getAuthModel, setAuthModel, setToken } from '../hooks/useLocalStorage';
 
 interface AuthContextType {
   user: User | null;
   isLoading?: boolean;
   isAuthenticated: boolean;
-  email: string;
-  setEmail: Dispatch<SetStateAction<string>>;
-  password: string;
-  setPassword: Dispatch<SetStateAction<string>>;
   error: string | null;
   isInitializing: boolean;
   clearError: () => void;
-  login: () => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -25,8 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
 
@@ -66,24 +60,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         onSuccess: () => {
             cleanStorage();
             setUser(null);
-            setEmail('');
-            setPassword('');
             setIsAuthenticated(false);
             queryClient.clear();
         }
     });
 
-    const handleLogin = async () => {
+    const handleLogin = async(email: string, password: string) => {
         try {
+            setIsLoading(true);
             setError(null);
-            
-            const response = await loginMutation.mutateAsync({ email, password });
+
+            const username = email;
+            const response = await loginMutation.mutateAsync({ email, password, username });
             
             queryClient.invalidateQueries({ queryKey: ['currentUser']});
 
-            if (response?.data?.token) {
+            setIsLoading(false);
+
+            if (response?.AccessToken) {
                 setUser(response.data);
                 setAuthModel(response.data);
+                setToken(response?.AccessToken);
                 setIsAuthenticated(true);
                 return { success: true, data: response.data };
             } else {
@@ -92,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return { success: false, message: errorMessage };
             }
         } catch (error: any) {
+            setIsLoading(false);
             const errorMessage = error.response?.data?.message || 
                             error.message || 
                             'Error al conectar con el servidor';
@@ -112,14 +110,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isLoading,
         isAuthenticated,
-        email, 
-        password, 
         error,
         isInitializing,
         login: handleLogin,
         logout: handleLogout,
-        setEmail, 
-        setPassword,
         clearError
     }
 
