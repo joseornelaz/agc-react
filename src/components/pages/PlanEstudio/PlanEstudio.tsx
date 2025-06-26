@@ -7,6 +7,7 @@ import Button from "../../atoms/Button/Button";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 import TabPanel from "../../molecules/TabPanel/TabPanel";
+import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 
 const materiaData = [
     {
@@ -41,6 +42,10 @@ const PlanEstudio: React.FC = () => {
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    const handleVideoBienvenida = () => {
+        alert("Abrir Modal del video");
+    }
 
     const InformacionStatusButtons = (status: string, color: "success" | "primary" | "info" | "warning" | undefined) => (
         <Box sx={{ paddingTop: '8px', display: 'flex', gap: '15px', justifyContent: 'space-between' }}>
@@ -100,7 +105,14 @@ const PlanEstudio: React.FC = () => {
     const BotonesVideoMapa = (flexDirection: string = "row") => (
         <Box sx={{ paddingTop: '32px', paddingBottom: '8px', display: 'flex', flexDirection, gap: '15px', justifyContent: 'space-between' }}>
             <>
-                <Button onClick={() => {}} fullWidth>Video de Bienvenida</Button>
+                <Button
+                    onClick={handleVideoBienvenida}
+                    fullWidth
+                    icon={!isMobile ? <OndemandVideoIcon /> : undefined}
+                    iconPosition={!isMobile ? "start" : undefined}
+                >
+                    Video de Bienvenida
+                </Button>
             </>
             <>
                 <Button onClick={() => {}} fullWidth variant="outlined" >Mapa Curricular</Button>
