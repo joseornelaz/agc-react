@@ -30,8 +30,8 @@ export const AppRouting = createHashRouter([
                 Component: Component.Calificaciones
               },
               {
-                path: AppRoutingPaths.MIRUTA,
-                Component: Component.MiRuta
+                path: AppRoutingPaths.MI_TRAYECTO,
+                Component: Component.MiTrayecto
               },
               {
                 path: AppRoutingPaths.SERVICIOS_ESCOLORES,
@@ -39,7 +39,7 @@ export const AppRouting = createHashRouter([
               },
               {
                 path: AppRoutingPaths.PREGUNTAS_FRECUENTES_INT,
-                Component: Component.PreguntasFrecuentes
+                Component: Component.PreguntasFrecuentesInternas
               },
               {
                 path: AppRoutingPaths.CALENDARIO,
@@ -60,6 +60,14 @@ export const AppRouting = createHashRouter([
               {
                 path: AppRoutingPaths.MI_PERFIL,
                 Component: Component.MiPerfil
+              },
+              {
+                path: AppRoutingPaths.CURSOS_ACTIVOS,
+                Component: Component.CursoActivo
+              },
+              {
+                path: AppRoutingPaths.CURSOS_ACTIVOS_DETALLES,
+                Component: Component.CursosActivosDetalles
               },
               {
                 path: AppRoutingPaths.AYUDA_INTERIOR,
