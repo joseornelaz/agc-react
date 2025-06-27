@@ -6,6 +6,7 @@ import { Typography } from "../../atoms/Typography/Typography";
 import { LinearProgressWithLabel } from "../../molecules/LinearProgress/LinearProgress";
 import { CursosActivos } from "@iconsCustomizeds";
 import { useNavigate } from "react-router-dom";
+import theme from "../../../theme";
 
 const cursosDatas = [
     {
@@ -30,7 +31,7 @@ const cursosDatas = [
 const CursoActivo: React.FC = () => {
 
     const navigate = useNavigate();
-    const goToInformacion = () => navigate(AppRoutingPaths.CURSOS_ACTIVOS_DETALLES);
+    const goToInformacion = () => navigate(AppRoutingPaths.CURSOS_ACTIVOS_DETALLES.replace(":id", "1"));
 
     const materiaItem = (status: 'Finalizada' | 'Cursando' | 'Inscribirme') => {
         let color: "success" | "primary" | "info" | "warning" | undefined;
@@ -91,7 +92,7 @@ const CursoActivo: React.FC = () => {
                                 Curso Activo Hasta: {item.fechaActivo}
                             </Typography>
 
-                            <Typography component="span" variant="body4">
+                            <Typography component="span" variant="h5" sxProps={{color: theme.palette.primary.main}}>
                                 Tu Proceso
                             </Typography>
                             <Box sx={{ padding: '10px 0 10px 0' }}>
