@@ -12,9 +12,12 @@ export { default as Calendario } from './pages/Calendario/Calendario';
 export { default as PlanEstudio } from './pages/PlanEstudio/PlanEstudio';
 export { default as CursoActivo } from './pages/CursosActivos/CursosActivos';
 export { default as CursosActivosDetalles } from './pages/CursosActivosDetalles/CursosActivosDetalles';
+export { default as CurosCertificaciones } from './pages/CurosCertificaciones/CurosCertificaciones';
+export { default as Certificaciones } from './pages/Certificaciones/Certificaciones';
 export { default as VideotecaBiblioteca } from './pages/VideotecaBiblioteca/VideotecaBiblioteca';
 export { default as MiPerfil } from './pages/MiPerfil/MiPerfil';
 export { default as Ayuda } from './pages/ayuda/Ayuda';
 export { default as PreguntasFrecuentesInternas } from './pages/PreguntasFrecuentes/PreguntasFrecuentesInternas';
+export { default as SalaConversacion } from './pages/SalaConversacion/SalaConversacion';
 
 export * as Organisms from './organisms';
