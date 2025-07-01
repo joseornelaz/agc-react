@@ -1,13 +1,13 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { Cropper, type CropperRef } from "react-advanced-cropper";
+// import { Cropper, type CropperRef } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
 
 import Perfil from '../../../assets/perfil.jpg';
 
 export const UploadIage: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const cropperRef = useRef<CropperRef>(null);
+    // const cropperRef = useRef<CropperRef>(null);
     
     const [image, setImage] = useState<string>(Perfil);
 
@@ -47,12 +47,12 @@ export const UploadIage: React.FC = () => {
 
     return(
         <Box>
-            <Cropper
+            {/* <Cropper
                 ref={cropperRef}
                 className="example__cropper"
                 backgroundClassName="example__cropper-background"
                 src={image}
-            />
+            /> */}
             <button className="example__button" onClick={onUpload}>
                 <input
                     ref={inputRef}
