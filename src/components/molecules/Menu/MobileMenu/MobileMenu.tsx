@@ -34,7 +34,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ anchorEl, onClose, menuT
         if (item.text === TitleScreen.CONTACTO) {
             setIsOpenContactoDialog(true);
         } else if (item.text === TitleScreen.MANUAL_INDUCCION) {
-            window.open('https://academiaglobal.mx/resources/assets/files/manuales/induccion/prueba.pdf', '_blank')
+            window.open('https://academiaglobal.mx/resources/assets/files/manuales/induccion/prueba.pdf', '_blank');
         } else {
             navigate(item.path);
         }
