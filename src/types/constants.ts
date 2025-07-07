@@ -22,7 +22,7 @@ export const AppRoutingPaths = {
     SERVICIOS_ESCOLORES: "/serv-esco",
     CONTACTO: "/contact",
     MANUAL_INDUCCION: "/manual",
-    PLAN_ESTUDIO_INFORMACION: "/informacion",
+    PLAN_ESTUDIO_INFORMACION: "/plan-estudios/info",
     CONSEJERIA: "/consejeria",
     BOLETIN_EDUCATIVO: "/boletin",
     CERTIFICACIONES: "/cert",
@@ -65,6 +65,7 @@ export const TitleScreen = {
     MI_TRAYECTO: "Mi Trayecto",
     APRENDE_MAS: "Aprende Más",
     TERMINOS_CONDICIONES: "Términos y Condiciones",
+    MANUALES_USUARIOS: "Manuales de Usuario",
 }
 
 export type TitleScreen = typeof TitleScreen;
