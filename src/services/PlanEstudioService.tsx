@@ -1,6 +1,6 @@
 import React from "react";
 import { apiClient } from "./ApiConfiguration/httpClient";
-import type { PlanEstudio, PlanEstudioResponse } from "../types/plan-estudio.interface";
+import type { PlanEstudio, PlanEstudioMateriasResponse, PlanEstudioResponse } from "../types/plan-estudio.interface";
 import { PLAN_ESTUDIO_ENDPOINTS } from "../types/endpoints";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,7 +14,7 @@ export const useGetPlanEstudio = (id_plan_estudio: number) => {
      });
 
 
-    const mapData = (data: PlanEstudio[]) => {
+    const mapData = (data: PlanEstudio[]): PlanEstudioMateriasResponse[] => {
         const statusMap: Record<number, string> = {
             0: "Inscribirme",
             1: "Finalizada",
@@ -22,7 +22,7 @@ export const useGetPlanEstudio = (id_plan_estudio: number) => {
             3: "Inscribirme",
         };
 
-        return Object.values(
+        const rows = Object.values(
             data.reduce((acc, curso) => {
                 const periodoKey = curso.periodo;
                 const estado_inscripcion = curso.estado_inscripcion || 0;
@@ -41,6 +41,8 @@ export const useGetPlanEstudio = (id_plan_estudio: number) => {
                 return acc;
             }, {} as Record<number, any>)
         );
+        
+        return rows;
     }
 
     return {
@@ -52,9 +54,9 @@ export const useGetPlanEstudio = (id_plan_estudio: number) => {
     }
 }
 
-export const useGetVideoMapa = (id_plan_estudio: number) => {
-    const mapaCurricular = useGetManuales("Mapa Curricular", id_plan_estudio);
-    const video = useGetManuales("Video de Bienvenida", id_plan_estudio);
+export const useGetVideoMapa = () => {
+    const mapaCurricular = useGetManuales("Mapa Curricular", "alumnos");
+    const video = useGetManuales("Video de Bienvenida", "alumnos");
 
     return { mapaCurricular, video };
 }
