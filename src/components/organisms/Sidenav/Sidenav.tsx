@@ -13,7 +13,7 @@ import Collapse from '@mui/material/Collapse';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router-dom';
 import { AppBar, Badge, IconButton, styled, Typography, type CSSObject, type Theme } from '@mui/material';
-import { AppRoutingPaths, MenuRoutes as MenuItems, TitleScreen } from '@constants';
+import { AppRoutingPaths, MenuRoutes as MenuItems } from '@constants';
 
 import Logo from '../../../assets/logo_ag.svg';
 import miniLogo from '../../../assets/miniLogo.png';
@@ -24,6 +24,7 @@ import { IconsTopBar } from '../../molecules/IconsTopBar/IconsTopBar';
 import { FabMenu } from '../../molecules/FabMenu/FabMenu';
 import { LeftCircle } from '../../../assets/icons';
 import { ShowBackMenuRoutes } from '../../../utils/Helpers';
+import { useAuth } from '../../../hooks';
 
 const drawerWidth = 240;
 
@@ -184,6 +185,7 @@ const Listado = (title: string, open: boolean, menuType: "main" | "more") => {
 const Sidenav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const showBackMenuRoutes = ShowBackMenuRoutes;
   
   const showBackMenu = showBackMenuRoutes.some(route =>
@@ -218,7 +220,7 @@ const Sidenav: React.FC = () => {
                   <DsSvgIcon component={LeftCircle} color='primary' />
                 </IconButton>
                 <Typography component="h4" variant="h4" sx={{ ml: '2px' }}>
-                  { TitleScreen.CURSOS_ACTIVOS }
+                  Regresar
                 </Typography>
               </Box>
             </Toolbar>
@@ -265,7 +267,7 @@ const Sidenav: React.FC = () => {
                
         <Box sx={[{height: '70px', display: 'flex', alignItems:'center', gap: '10px', justifyContent: !open ? 'center' : 'flex-start'}, open && {paddingLeft: '20px'}]}>
               <IconButton sx={{ p: 0 }}>
-                <Avatar width={48} height={48} onClick={handleMiPerfil} />
+                <Avatar width={48} height={48} onClick={handleMiPerfil} alt={user?.name} src={user?.photo} />
               </IconButton>
               {
                 open && 
@@ -280,10 +282,10 @@ const Sidenav: React.FC = () => {
                 >
                   <Box>
                     <Typography variant="body1" component="div">
-                      Nombre
+                      {user?.name}
                     </Typography>
                     <Typography variant="body1" component="div">
-                      Aguascalientes, Mexico
+                      {user?.city}
                     </Typography>
                   </Box>
                 </Badge>                

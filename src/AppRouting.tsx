@@ -109,6 +109,18 @@ export const AppRouting = createHashRouter([
                 path: AppRoutingPaths.VIDEOTECA_DETALLE,
                 Component: Component.VideotecaDetalle
               },
+              {
+                path: AppRoutingPaths.CALIFICACIONES_DETALLE,
+                Component: Component.CalificacionesDetalle
+              },
+              {
+                path: AppRoutingPaths.CONTACTO,
+                Component: Component.ContactoInterno
+              },
+              {
+                path: AppRoutingPaths.FOROS,
+                Component: Component.Foros
+              },
             ]
           }
         ]

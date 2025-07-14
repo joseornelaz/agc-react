@@ -22,7 +22,7 @@ export const AppRoutingPaths = {
     SERVICIOS_ESCOLORES: "/serv-esco",
     CONTACTO: "/contact",
     MANUAL_INDUCCION: "/manual",
-    PLAN_ESTUDIO_INFORMACION: "/plan-estudios/info",
+    PLAN_ESTUDIO_INFORMACION: "/plan-estudios/info/:id",
     CONSEJERIA: "/consejeria",
     BOLETIN_EDUCATIVO: "/boletin",
     CERTIFICACIONES: "/cert",
@@ -31,7 +31,9 @@ export const AppRoutingPaths = {
     MI_TRAYECTO: "/mi-trayecto",
     TERMINOS_CONDICIONES: "/terminos-condiciones",
     VIDEOTECA_DETALLE: "/videoteca",
-    APRENDE_MAS: "aprende-mas",
+    APRENDE_MAS: "/aprende-mas",
+    CALIFICACIONES_DETALLE: "/calificacion/detalle/:id",
+    FOROS: "/foros",
 
 } as const;
 

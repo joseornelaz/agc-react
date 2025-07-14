@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthLogin as loginApi, useLogout as logoutApi } from '../services/AuthService';
+import { useAuthLogin as loginApi, useLogout as logoutApi, useGetPerfilUsuario } from '../services/AuthService';
 import type { User } from '@constants';
-import { checkAuthStatus, cleanStorage, getAuthModel, setToken } from '../hooks/useLocalStorage';
+import { checkAuthStatus, cleanStorage, setAuthModel, getAuthModel, setToken } from '../hooks/useLocalStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +13,7 @@ interface AuthContextType {
   clearError: () => void;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
+  isTokenExpired: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [isTokenExpired, setIsTokenExpired] = useState(false);
+
+    const { refetch } = useGetPerfilUsuario({ enabled: false });
 
     const queryClient = useQueryClient();
     
@@ -31,11 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const checkAuth = async () => {
             try {
                 const authStatus = await checkAuthStatus();
-                if (authStatus) {
+                if(!authStatus.isAuth) {
+                    setIsAuthenticated(false);
+                }else if (authStatus.tokenExpired) {
+                    setIsTokenExpired(true);
+                }
+
+                if (authStatus.isAuth) {
                     const userData = await getAuthModel();
                     setUser(userData);
                 }
-                setIsAuthenticated(authStatus);
+                setIsAuthenticated(authStatus.isAuth);
             } catch (error) {
                 console.error("Error checking auth:", error);
                 setIsAuthenticated(false);
@@ -61,14 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             cleanStorage();
             setUser(null);
             setIsAuthenticated(false);
+            setIsTokenExpired(false);
             queryClient.clear();
         }
     });
 
     const handleLogin = async(email: string, password: string) => {
         try {
-            setIsLoading(true);
-            setError(null);
+            initValues();
 
             const username = email;
             const response = await loginMutation.mutateAsync({ password, username });
@@ -78,10 +88,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsLoading(false);
 
             if (response?.token) {
-                // setUser(response.data);
-                // setAuthModel(response.data);
                 setToken(response?.token);
                 setIsAuthenticated(true);
+
+                const perfil = await refetch();
+                
+                if (perfil.data) {
+                    const auth = {
+                            name: `${perfil.data.data.nombre} ${perfil.data.data.apellido_paterno} ${perfil.data.data.apellido_materno}`,
+                            email: perfil.data.data.correo,
+                            photo: perfil.data.data.foto_perfil_url,
+                            city: `${perfil.data.data.nombre_ciudad}, ${perfil.data.data.nombre_pais}`
+                        };
+                    setUser(auth);
+                    setAuthModel(auth);
+                } else {
+                    setUser(null);
+                }
+
                 return { success: true, data: null };
             } else {
                 const errorMessage = response?.message || 'Autenticación fallida';
@@ -99,12 +123,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const handleLogout = async () => {
+        setIsAuthenticated(false);
+        setIsTokenExpired(false);
         await logoutMutation.mutate();
     };
     
     const clearError = () => {
         setError(null);
     };
+
+    const initValues = () => {
+        setUser(null);
+        setIsLoading(true);
+        setIsAuthenticated(false);
+        setError(null);
+        setIsTokenExpired(false);        
+    }
 
     const value = {
         user,
@@ -114,7 +148,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isInitializing,
         login: handleLogin,
         logout: handleLogout,
-        clearError
+        clearError,
+        isTokenExpired
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

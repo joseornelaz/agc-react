@@ -14,6 +14,7 @@ export const PERFIL_ENDPOINTS = {
 
 export const PLAN_ESTUDIO_ENDPOINTS = {
     GET_MATERIAS: { path:'/plan-estudios', key: 'materias' },
+    GET_INFORMACION_MATERIAS: { path:'/plan-estudios/cursos/informacion', key: 'informacion' },
 }
 
 export const CURSOS_ACTIVOS_ENDPOINTS = {
@@ -32,7 +33,7 @@ export const CALIFICACIONES_ENDPOINTS = {
 }
 
 export const MAS_INFORMACION_ENDPOINTS = {
-    GET_SERVICIOS_ESCOLARES: { path:'/mas-informacion/servicios-escolares/auth', key: 'servicios-escolares' },
+    GET_SERVICIOS_ESCOLARES: { path:'/serviciosescolares', key: 'servicios-escolares' },
     GET_CONTACTO: { path:'/mas-informacion/contacto', key: 'contacto' },
     GET_LINEAMIENTOS: { path:'/mas-informacion/lineamientos', key: 'lineamientos' },
     GET_MANUAL_INDUCCION: { path:'/mas-informacion/manual-induccion', key: 'manual-induccion' },
@@ -47,7 +48,7 @@ export const CONTACTO_ENDPOINTS = {
 }
 
 export const AYUDA_ENDPOINTS = {
-    POST_AYUDA: { path:'/ayuda' },
+    POST_AYUDA: { path:'/tickets-ayuda' },
 }
 
 export const MANUALES_ENDPOINTS = {
@@ -57,4 +58,5 @@ export const MANUALES_ENDPOINTS = {
 export const BIBLIOTECA_ENDPOINTS = {
     GET_BIBLIOTECA: { path: '/modulos-campus/detalle', key: 'biblioteca' },
     GET_BIBLIOTECA_BY_ID: { path: '/modulos-campus/submodulos', key: 'biblioteca_by_id' },
+    GET_LISTADO_VIDEOTECA: { path: '/biblioteca', key: 'listado-videoteca' },
 }
