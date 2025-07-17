@@ -85,20 +85,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             queryClient.invalidateQueries({ queryKey: ['currentUser']});
 
-            setIsLoading(false);
-
             if (response?.token) {
                 setToken(response?.token);
                 setIsAuthenticated(true);
 
                 const perfil = await refetch();
                 
+                setIsLoading(false);
+
                 if (perfil.data) {
                     const auth = {
                             name: `${perfil.data.data.nombre} ${perfil.data.data.apellido_paterno} ${perfil.data.data.apellido_materno}`,
                             email: perfil.data.data.correo,
                             photo: perfil.data.data.foto_perfil_url,
-                            city: `${perfil.data.data.nombre_ciudad}, ${perfil.data.data.nombre_pais}`
+                            city: `${perfil.data.data.nombre_ciudad}`,
+                            phone: perfil?.data.data.telefonos?.find((item) => item.tipo === "Celular")?.numero ?? "0000000000"
                         };
                     setUser(auth);
                     setAuthModel(auth);
@@ -108,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 return { success: true, data: null };
             } else {
+                setIsLoading(false);
                 const errorMessage = response?.message || 'Autenticación fallida';
                 setError(errorMessage);
                 return { success: false, message: errorMessage };

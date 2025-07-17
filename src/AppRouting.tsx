@@ -121,6 +121,22 @@ export const AppRouting = createHashRouter([
                 path: AppRoutingPaths.FOROS,
                 Component: Component.Foros
               },
+              {
+                path: AppRoutingPaths.NOSOTROS,
+                Component: Component.ConsejeriaNosotros
+              },
+              {
+                path: AppRoutingPaths.AGENDA_CITA,
+                Component: Component.ConsejeriaCita
+              },
+              {
+                path: AppRoutingPaths.CONSEJERIA_BLOG,
+                Component: Component.ConsejeriaBlog
+              },
+              {
+                path: AppRoutingPaths.NOTIFICACIONES,
+                Component: Component.Notificaciones
+              },
             ]
           }
         ]

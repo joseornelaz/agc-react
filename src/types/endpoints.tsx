@@ -9,7 +9,8 @@ export const NOTIFICATIONS_ENDPOINTS = {
 }
 
 export const PERFIL_ENDPOINTS = {
-    GET_PERFIL: { path: '/perfil', key: 'perfil' }
+    GET_PERFIL: { path: '/perfil', key: 'perfil' },
+    POST_PERFIL: { path: '/actualizar', key: 'actualizar' }
 }
 
 export const PLAN_ESTUDIO_ENDPOINTS = {
@@ -18,8 +19,8 @@ export const PLAN_ESTUDIO_ENDPOINTS = {
 }
 
 export const CURSOS_ACTIVOS_ENDPOINTS = {
-    GET_MATERIAS: { path:'/cursos-activos/materias', key: 'cursos-act-materias' },
-    GET_MATERIAS_BY_ID: { path:'/cursos-activos/materias', key: 'cursos-act-materias-id' },
+    GET_MATERIAS: { path:'/cursos-activos', key: 'cursos-act-materias' },
+    GET_CURSOS_CONTENIDO_BY_ID: { path:'/cursos-activos/contenido', key: 'cursos-contenido-id' },
     GET_MAPA_CURRICULAR: { path:'/cursos-activos/mapa-curricular', key: 'cursos-act-mapa-curricular' },
     POST_AUTH: { path: '/cursos-activos/auth' }
 }
@@ -49,6 +50,12 @@ export const CONTACTO_ENDPOINTS = {
 
 export const AYUDA_ENDPOINTS = {
     POST_AYUDA: { path:'/tickets-ayuda' },
+    POST_AYUDA_ALUMNOS: { path:'/tickets-ayuda/alumnos' },
+    POST_AYUDA_TUTOR: { path:'/tickets-ayuda/tutor' },
+    GET_AYUDA: { path:'/tickets-ayuda', key: 'tickets' },
+    GET_MATERIAS: { path:'/tickets-ayuda/materias', key: 'materias' },
+    GET_TUTORES: { path:'/tickets-ayuda/tutores', key: 'tutores' },
+    GET_ASUNTOS_TEMAS: { path:'/tickets-ayuda/temas-ayuda', key: 'temas-ayuda' },
 }
 
 export const MANUALES_ENDPOINTS = {
