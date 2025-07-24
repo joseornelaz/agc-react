@@ -3,6 +3,8 @@ import { jwtDecode } from 'jwt-decode';
 
 const TOKEN_STORAGE_KEY = import.meta.env.VITE_APP_AUTH_TOKEN;
 const AUTH_MODEL_STORAGE_KEY = import.meta.env.VITE_APP_AUTH;
+const FORO_KEY = import.meta.env.VITE_APP_FORO;
+const TAB_SELECTED_KEY = import.meta.env.VITE_APP_TAB_SELECTED;
 
 export const checkAuthStatus = async (): Promise<{ isAuth: boolean; tokenExpired: boolean }> => {
   const token = getToken();
@@ -51,4 +53,32 @@ export const cleanStorage = (): void => {
 
     // Remove Authentication model
     localStorage.removeItem(AUTH_MODEL_STORAGE_KEY);
+}
+
+export const setForoSelected = (foro: string) => {
+  localStorage.setItem(FORO_KEY, foro);
+}
+
+export const getForoSelected = (): string => {
+  return localStorage.getItem(FORO_KEY) || '';
+}
+
+export const setTabSelected = (tab: { tab: string, index: number }) => {
+  const tabs: { tab: string; index: number }[] = JSON.parse(localStorage.getItem(TAB_SELECTED_KEY) || '[]');
+
+  const existingIndex = tabs.findIndex((item: any) => item.tab === tab.tab);
+
+  if (existingIndex >= 0) {
+    tabs[existingIndex].index = tab.index;
+  } else {
+    tabs.push(tab);
+  }
+
+  localStorage.setItem(TAB_SELECTED_KEY, JSON.stringify(tabs));
+};
+
+export const getTabSelected = (tab: string) => {
+  const tabs: { tab: string; index: number }[] = JSON.parse(localStorage.getItem(TAB_SELECTED_KEY) || '[]');
+
+  return tabs.find((item) => item.tab === tab)?.index || 0;
 }

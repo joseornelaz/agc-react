@@ -12,4 +12,31 @@ export type { PlanEstudioInformacionResponse, InformacionData, Cursamiento, Pond
 export type { PerfilResponse, Perfil, TelefonoPerfil, PerfilPayload } from './Perfil.interface';
 export type { ServiciosEscolaresResponse, ServiciosEscolares } from './ServiciosEscolares.interface';
 
-export type { CursosActivosResponse, CursoActivo, CursosContenidoResponse, Contenido } from './Cursos.interface';
+export type { 
+    CursosActivosResponse, 
+    CursoActivo, 
+    CursosTabsResponse, 
+    CursosTabs, 
+    CursosActividadesResponse, 
+    CursosActividades, 
+    Actividad, 
+    Entrega, 
+    Archivo,
+    CursosTutoriasResponse,
+    Tutoria,
+    RecursoTutoria,
+    ActividadEntregadaResponse,
+    ActividadEntregada,
+    ActividadEntregadaArchivo,
+    ManualesActividad,
+    CursosListaPendientesResponse,
+    ListaPendientes
+} from './Cursos.interface';
+
+export type {
+    TemaForoByIdResponse,
+    TemaForo,
+    ForosSaveResponse,
+    ForosSave,
+    Mensaje,
+} from './SalaConversacion.interface';
