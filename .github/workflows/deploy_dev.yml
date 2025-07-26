@@ -48,5 +48,9 @@ jobs:
         # Publica o despliega (ajusta este paso según tu flujo)
         - name: Deploy to Develop Environment
           run: echo "Deploying to develop environment..."
+
+        - name: Deploy on
+          run: echo "https://joseornelaz.github.io/agc-react/#/login"          
+
                 # Aquí puedes agregar comandos de despliegue reales, por ejemplo:
                 # run: npm run deploy:dev
