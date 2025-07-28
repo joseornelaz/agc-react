@@ -5,7 +5,8 @@ export const LOGIN_ENDPOINTS = {
 }
 
 export const NOTIFICATIONS_ENDPOINTS = {
-    GET_NOTIFICATIONS: { path: '/notificaciones', key: 'notificaciones' }
+    GET_NOTIFICATIONS: { path: '/notificaciones', key: 'notificaciones' },
+    POST_NOTIFICATIONS: { path: '/notificaciones/read' }
 }
 
 export const PERFIL_ENDPOINTS = {
@@ -16,6 +17,7 @@ export const PERFIL_ENDPOINTS = {
 export const PLAN_ESTUDIO_ENDPOINTS = {
     GET_MATERIAS: { path: '/plan-estudios', key: 'materias' },
     GET_INFORMACION_MATERIAS: { path: '/plan-estudios/cursos/informacion', key: 'informacion' },
+    POST_CARGAR_CURSO: { path: '/plan-estudios/cargar-curso' }
 }
 
 export const CURSOS_ACTIVOS_ENDPOINTS = {
@@ -35,7 +37,7 @@ export const CALIFICACIONES_ENDPOINTS = {
 }
 
 export const MAS_INFORMACION_ENDPOINTS = {
-    GET_SERVICIOS_ESCOLARES: { path: '/serviciosescolares', key: 'servicios-escolares' },
+    GET_SERVICIOS_ESCOLARES: { path: '/mas-informacion/servicios-escolares', key: 'servicios-escolares' },
     GET_CONTACTO: { path: '/mas-informacion/contacto', key: 'contacto' },
     GET_LINEAMIENTOS: { path: '/mas-informacion/lineamientos', key: 'lineamientos' },
     GET_MANUAL_INDUCCION: { path: '/mas-informacion/manual-induccion', key: 'manual-induccion' },
