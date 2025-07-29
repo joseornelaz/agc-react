@@ -1,99 +1,52 @@
 import React from 'react';
-import { TituloIcon } from '../../molecules/TituloIcon/TituloIcon';
-import { TitleScreen } from '@constants';
+
 import { Typography } from "../../atoms/Typography/Typography";
-import { Users as ConsejeriaEstudiantil } from "@iconsCustomizeds";
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,  useMediaQuery, useTheme} from "@mui/material";
+import { Box, Divider, useTheme } from "@mui/material";
+import { flexColumn, flexRows } from '@styles';
 
-
-const ConsejeriaBlog: React.FC = () => {
+export const BlogConsejeria: React.FC = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    function createData(
-        name: string,
-        date: string,
-    ) {
-        return { name, date };
-    }
-
-    const rows = [
-        createData('Conferencia "Priorizando Actividades: Estrategias de Gestión del tiempo para estudiantes" (15:00 hrs. Tiempo Pacífico/ 16:00 hrs. Tiempo Centro)', '2024-01-17',),
-        createData('Conferencia "Manejando el Estrés con Efectividad" (15:00 hrs. Tiempo Pacífico/ 16:00 hrs. Tiempo Centro)', '2024-02-14')
-
-    ];
 
     function BasicTable() {
         return (
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="center">Evento</TableCell>
-                            <TableCell align="center">Fecha</TableCell>
 
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.map((row) => (
-                            <TableRow
-                                key={row.name}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell component="th" scope="row">
-                                    {row.name}
-                                </TableCell>
-                                <TableCell align="left">{row.date}</TableCell>
+            <Box sx={{ ...flexColumn, gap: '20px' }}>
 
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                <Box sx={{ ...flexColumn, width: '100%' }}>
+                    <Divider textAlign="center" sx={{ width: '100%' }}>
+                        <Typography component="h4" variant="h4" color="primary" >AGENDA</Typography>
+                    </Divider>
+                    <Box sx={{ ...flexRows, justifyContent: 'space-around', width: '100%', height: '48px', backgroundColor: theme.palette.primary.main }} >
+                        <Typography component="span" variant="body2" sxProps={{ color: '#ffffff' }}>Evento</Typography>
+                        <Typography component="span" variant="body2" sxProps={{ color: '#ffffff' }}>Fecha</Typography>
+                    </Box>
+                    <Box sx={{ ...flexRows, justifyContent: 'space-around', width: '100%', height: '42px', borderBottom: `1px solid ${theme.palette.grey[300]}` }}>
+                        <Box sx={{...flexRows}}>
+                            <Typography component="span" variant="body2" color="text.primary">Próximamente</Typography>
+                        </Box>
+                        <Box sx={{...flexRows}}>
+                            <Typography component="span" variant="body2" color="text.primary">2025-02-05</Typography>
+                        </Box>
+                    </Box>
+                </Box>
+                <Box sx={{ ...flexColumn, gap: '20px', width: '100%', justifyContent: 'flex-start' }}>
+
+                    <Divider textAlign="center" sx={{ width: '100%' }}>
+                        <Typography component="h4" variant="h4" color="primary" >BLOG</Typography>
+                    </Divider>
+
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', justifyContent: 'flex-start' }}>
+                        <Typography component="h4" variant="h4" color="primary">COMUNICACIÓN ASERTIVA: </Typography>
+                        <Typography component="h4" variant="h4" sxProps={{color: theme.palette.grey[100]}} >CLAVE PARA UN CLIMA LABORAL POSITIVO </Typography>
+                    </Box>
+                </Box>
+            </Box>
         );
     }
 
 
-
-
     return (
-        <>
-            {
-                isMobile
-                    ?
-                    <>
-                        <TituloIcon Titulo={TitleScreen.CONSEJERIA} Icon={ConsejeriaEstudiantil} />
-
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-                            <Typography component="h4" variant="h4" sxProps={{ color: theme.palette.text.primary, fontFamily: theme.typography.fontFamily, textAlign: 'center' }}>
-                                AGENDA
-                            </Typography>
-                            {BasicTable()}
-
-                            <Typography component="h4" variant="h4" sxProps={{ color: theme.palette.text.primary, fontFamily: theme.typography.fontFamily, textAlign: 'left' }}>
-                                BLOG
-                            </Typography>
-
-                            <Typography component="h4" variant="h4" sxProps={{ color: theme.palette.text.primary, fontFamily: theme.typography.fontFamily, textAlign: 'left' }}>
-                                COMUNICACIÓN ASERTIVA: CLAVE PARA UN CLIMA LABORAL POSITIVO
-                            </Typography>
-                            <Typography component="h5" variant="h5" sxProps={{ color: theme.palette.text.primary, fontFamily: theme.typography.fontFamily, textAlign: 'left' }}>
-                                COMUNICACIÓN ASERTIVA: CLAVE PARA UN CLIMA LABORAL POSITIVO
-                            </Typography>
-                        </Box>
-                    </>
-                    :
-                    <>
-                        <TituloIcon Titulo={TitleScreen.CONSEJERIA} Icon={ConsejeriaEstudiantil} />
-                        <Typography component="p" variant="body1" sxProps={{ color: theme.palette.text.primary, fontFamily: theme.typography.fontFamily, mb: '20px' }}>
-                            Esta Sala de Conversación es un espacio que ponemos a disposición de todas y todos nuestros estudiantes, con el propósito de que entables diálogos productivos, generen redes de contactos y amigos, compartan información, experiencias y aporten ideas que enriquezcan sus conocimientos.
-                        </Typography>
-                    </>
-            }
-        </>
-
+        BasicTable()
     );
 };
-
-export default ConsejeriaBlog;
