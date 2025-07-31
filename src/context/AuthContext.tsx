@@ -108,11 +108,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (response?.token) {
                 setToken(response?.token);
-                setIsAuthenticated(true);
                 setAceptoTerminos(response?.acepto_terminos);                
-
-                await procesarPerfil();
                 
+                await procesarPerfil();
+                setIsAuthenticated(true);                
                 setIsLoading(false);
 
                 return { success: true, data: null, cambiarPassword: false, aceptoTerminos: aceptoTerminos };
