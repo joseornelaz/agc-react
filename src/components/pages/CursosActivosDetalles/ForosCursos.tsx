@@ -2,6 +2,7 @@ import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { TituloIcon } from "../../molecules/TituloIcon/TituloIcon";
 import Button from "../../atoms/Button/Button";
 import { Accordion } from "../../molecules/Accordion/Accordion";
+import { AccordionStatus } from "../../molecules/AccordionStatus/AccordionStatus";
 import { Foros } from '../../../assets/icons';
 import EastIcon from '@mui/icons-material/East';
 import { accordionStyle, flexColumn, innerHTMLStyle } from "@styles";
@@ -19,7 +20,7 @@ export const ForosCursos: React.FC = () => {
 
     const {id} = useParams<{id:string}>();    
     const {data: { agrupadoPorUnidad: foros, manuales }, isLoading} = useGetForosManuales(Number(id!), "Foros");
-    
+
     const handleForo = (item: CursosTabs) => {
         setForoSelected(JSON.stringify(item));
         navigate(AppRoutingPaths.FOROS.replace(":id", `${item.id_recurso}`));
@@ -40,7 +41,8 @@ export const ForosCursos: React.FC = () => {
 
     const AccordionSection = () => (
         Object.entries(foros).map(([unidad, contenidos], index) => 
-            <Accordion key={index} title={`Unidad ${toRoman(Number(unidad))}`} sxProps={accordionStyle}>
+
+            <Accordion key={index} customHeader={<AccordionStatus tittle={`Unidad ${toRoman(Number(unidad))}`} status={contenidos?.[0]?.estatus_respuesta} />} sxProps={accordionStyle}>
                 {
                     isMobile && <TituloIcon key={1} Titulo={'Foros'} Icon={Foros} />
                 }
