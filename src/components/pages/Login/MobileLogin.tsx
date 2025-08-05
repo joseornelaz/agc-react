@@ -57,6 +57,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
         setUserName(data.username);
         const result = await login(data.username, data.password);
         // enviar formulario
+        console.log("Login result:", result);
         if (result.success) {
             if(result.aceptoTerminos)
                 navigate(AppRoutingPaths.PLAN_ESTUDIOS);
@@ -123,7 +124,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                         textAlign: 'center',
                     }}
                 >
-                    Para iniciar sesión,<br />ingresa tu usuario y contraseña
+                    Para iniciar sesión,<br />ingresa tu usuario y contraseña v2
                 </Typography>
                 <Box component="form" sx={{ mt: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <TextField
