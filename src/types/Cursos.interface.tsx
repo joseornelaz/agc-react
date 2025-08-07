@@ -57,15 +57,16 @@ export interface Actividad {
     id_recurso:         number;
     tipo_elemento:      string;
     titulo_elemento:    string;
-    fecha_elemento:     Date;
+    fecha_elemento:     string;
     contenido_elemento: string;
-    creado_por:         null;
-    url:                null;
+    creado_por:         string;
+    url:                string;
     estatus:            string;
     activo:             number;
     eliminado:          number;
     hasEntrega:         number;
     entrega:            Entrega | null;
+    calificacion:       string | null;
 }
 
 export interface Entrega {
