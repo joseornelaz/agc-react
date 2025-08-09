@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, TextField, useMediaQuery, useTheme } from "@mui/material";
 import Button from "../../atoms/Button/Button";
 import { Accordion } from "../../molecules/Accordion/Accordion";
-import { accordionStyle, flexColumn, flexRows } from "@styles";
+import { accordionStyle, flexColumn, flexRows, innerHTMLStyle } from "@styles";
 import { useParams } from "react-router-dom";
 import { updateActividad, useGetActividades } from "../../../services/CursosActivosService";
 import { LoadingCircular } from "../../molecules/LoadingCircular/LoadingCircular";
@@ -14,6 +14,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useNotification } from "../../../providers/NotificationProvider";
 import { AccordionStatus } from "../../molecules/AccordionStatus/AccordionStatus";
 import StatusIcon from "../../molecules/StatusIcon/StatusIcon";
+import { RetroalimentacionDialog } from "../../molecules/Dialogs/RetroalimentacionDialog/RetroalimentacionDialog";
 
 type PreviewFile = {
     file: File;
@@ -36,6 +37,8 @@ export const Actividades: React.FC = () => {
 
     const [archivosPorId, setArchivosPorId] = useState<Record<number, PreviewFile[]>>({});
     const [contenido, setContenido] = useState<Record<number, string>>({});
+    const [openRetroDialog, setOpenRetroDialog] = useState(false);
+    const [retroalimentacion, setRetroalimentacion] = useState<string>("");
 
     const handleFilesChange = (id: number, files: PreviewFile[]) => {
         setArchivosPorId((prev) => ({
@@ -208,6 +211,10 @@ export const Actividades: React.FC = () => {
         </Box>
     );
 
+    const handleRetroAlimentacion = (retroalimentacion: string) => {
+        setRetroalimentacion(retroalimentacion);
+        setOpenRetroDialog(true);
+    }
 
     return (
         <>
@@ -241,26 +248,33 @@ export const Actividades: React.FC = () => {
                                     <Box
                                         key={i}
                                     >
+                                        {
+                                            item.calificacion && 
+                                            <Box sx={[
+                                                    {...flexRows, justifyContent: 'space-between', pl: 3, pr: 3, borderBottom: `1px solid #E0E0E0`, pb: 1},
+                                                    isMobile && { flexDirection: 'column', gap: '10px' }
+                                                ]}>
+                                                <Box sx={{ display: 'flex', gap: '10px' }}>
+                                                    <Typography component="h3" variant="h3" color="primary">Calificación:</Typography>
+                                                    <Typography component="h3" variant="h3" >{ item.calificacion }</Typography>
+                                                </Box>
+                                                <Box sx={{ width: '250px'}}>
+                                                    {
+                                                        item.retroalimentacion && <Button
+                                                            fullWidth
+                                                            onClick={() => handleRetroAlimentacion(item.retroalimentacion || '')}
+                                                            isLoading={isSaving}
+                                                        >
+                                                            Ver Retroalimentación
+                                                        </Button>
+                                                    }
+                                                </Box>
+                                            </Box>
+                                        }
+                                            
                                         <Box
                                             dangerouslySetInnerHTML={{ __html: item.contenido_elemento }}
-                                            sx={{
-                                                '& h1, h2': {
-                                                    font: theme.typography.h4
-                                                },
-                                                '& h1, h2, h3': {
-                                                    color: 'primary.main',
-                                                },
-                                                '& p': {
-                                                    marginBottom: '1rem',
-                                                    lineHeight: 1.6,
-                                                    color: 'text.primary'
-                                                },
-                                                '& ul': {
-                                                    paddingLeft: '1.5rem',
-                                                    listStyleType: 'disc',
-                                                },
-                                                pl: 3, pr: 3
-                                            }}
+                                            sx={{...innerHTMLStyle}}
                                         />
                                         <Box sx={{ pl: 3, pr: 3, pb: 3 }}>
                                             <Typography component="h4" variant="h4" sxProps={{ color: theme.palette.primary.main, fontFamily: theme.typography.fontFamily }}>
@@ -335,14 +349,14 @@ export const Actividades: React.FC = () => {
                                                             </>
                                                         </Box>
                                                     :
-                                                    <Button
-                                                        fullWidth
-                                                        onClick={() => handleSaveActivity(item.id_recurso)}
-                                                        sxProps={{ mt: 2 }}
-                                                        isLoading={isSaving}
-                                                    >
-                                                        Finalizar Actividad
-                                                    </Button>
+                                                        item.calificacion === null && <Button
+                                                            fullWidth
+                                                            onClick={() => handleSaveActivity(item.id_recurso)}
+                                                            sxProps={{ mt: 2 }}
+                                                            isLoading={isSaving}
+                                                        >
+                                                            Finalizar Actividad
+                                                        </Button>
                                             }
 
                                         </Box>
@@ -353,6 +367,7 @@ export const Actividades: React.FC = () => {
                         </Accordion>
                     )
             }
+            <RetroalimentacionDialog isOpen={openRetroDialog} close={() => setOpenRetroDialog(false)} retroalimentacion={retroalimentacion} />
         </>
     );
 };

@@ -3,15 +3,14 @@ import React, { useEffect } from "react";
 import Button from "../../../atoms/Button/Button";
 import { Dialog } from "../../../atoms/Dialog/Dialog";
 import { Typography } from "../../../atoms/Typography/Typography";
-import type { Glosario } from "../../../../types/Calificaciones.interface";
 
-type GlosarioDialogProps = {
+type RetroDialogProps = {
     isOpen?: boolean;
-    glosario?: Glosario[];
+    retroalimentacion?: string;
     close: () => void;
 }
 
-export const GlosarioTerminosDialog: React.FC<GlosarioDialogProps> = ({isOpen, glosario, close}) => {
+export const RetroalimentacionDialog: React.FC<RetroDialogProps> = ({isOpen, retroalimentacion, close}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [open, setOpen] = React.useState(false);
@@ -48,14 +47,10 @@ export const GlosarioTerminosDialog: React.FC<GlosarioDialogProps> = ({isOpen, g
                         },
                     }}
                 >
-                    <Typography component="span" variant="body2" color="primary">Glosario de Términos</Typography>
+                    <Typography component="span" variant="body2" color="primary">Retroalimentación</Typography>
                 </Divider>
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: '25px', paddingBottom: '16px'}}>
-                    {glosario && glosario.map((item) => (
-                        <Typography key={item.id_glosario} component="span" variant="body2" color="primary">
-                            {item.termino}: <Typography component="span" variant="body1">{item.descripcion}</Typography>
-                        </Typography>
-                    ))}
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: '25px', paddingBottom: '24px'}}>
+                    <Typography component="span" variant="body2">{retroalimentacion}</Typography>
                 </Box>
                 {closeButton}
                 <Box sx={{paddingTop:'10px'}}></Box>
