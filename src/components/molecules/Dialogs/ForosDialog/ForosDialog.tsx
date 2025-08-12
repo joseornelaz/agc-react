@@ -3,7 +3,7 @@ import { Box, Typography, useMediaQuery } from "@mui/material";
 import Button from "../../../atoms/Button/Button";
 import { Dialog } from "../../../atoms/Dialog/Dialog";
 import { Edit1 } from "@iconsCustomizeds";
-import { flexColumn } from "@styles";
+import { flexColumn, innerHTMLStyle } from "@styles";
 import RichText from "../../RichText/RichText";
 import type { RichTextEditorRef } from "mui-tiptap";
 import theme from "../../../../themes/theme";
@@ -27,6 +27,9 @@ export const ComentariosDialog: React.FC<ComentariosDialogProps> = ({ type, isOp
     const [isDisabled, setIsDisabled] = React.useState(true);
 
     const editorRef = React.useRef<RichTextEditorRef>(null);
+
+    const [expandido, setExpandido] = React.useState(false);
+    const limiteCaracteres = 400;
 
     useEffect(() => {
         setOpen(isOpen ?? false);
@@ -96,6 +99,11 @@ export const ComentariosDialog: React.FC<ComentariosDialogProps> = ({ type, isOp
         setTimeout(() => setIsDisabled(html === '<p></p>'), 50);
     }
 
+    const textoMostrar = expandido
+        ? textAccion?.mensaje ?? ""
+        : (textAccion?.mensaje?.slice(0, limiteCaracteres) ?? "") +
+        ((textAccion?.mensaje?.length ?? 0) > limiteCaracteres ? "..." : "");
+
     return (
         <Dialog isOpen={open} sxProps={{ width: isMobile ? '350px' : '768px' }} >
             <Box
@@ -105,10 +113,30 @@ export const ComentariosDialog: React.FC<ComentariosDialogProps> = ({ type, isOp
             >
                 <Typography component="h4" variant="h4" children={title} color="primary" />
 
-                <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: type === 'Responder' ? String(textAccion?.mensaje || '') : '' }}
-                >
+                <Box sx={{ maxHeight: '250px', overflow: 'auto' }}>
 
-                </Typography>
+                    <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: type === 'Responder' || type === 'Comentar' ? String(textoMostrar || '') : '' }}
+                        sx={{
+                            ...innerHTMLStyle, pl: 0, pr: 0, '& p': {
+                                marginBottom: '5px'
+                            }
+                        }}
+                    >
+
+                    </Typography>
+                    {(textAccion?.mensaje?.length ?? 0) > limiteCaracteres && (
+                        <Typography
+                            component="span"
+                            variant="body1"
+                            color="primary"
+                            onClick={() => setExpandido(!expandido)}
+                            sx={{ textDecoration: 'underline', cursor: 'pointer' }}
+                        >
+                            {expandido ? "Ver menos" : "Ver más"}
+                        </Typography>
+                    )}
+                </Box>
+
                 <Box
                     sx={{
                         width: '100%',
