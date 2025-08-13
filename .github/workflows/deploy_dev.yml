@@ -35,7 +35,7 @@ jobs:
 
         # Construye el proyecto (ajusta según tu proyecto)
         - name: Build project
-          run: npm run build
+          run: npm run git-page
 
         - name: Upload artifact
           uses: actions/upload-pages-artifact@v3
