@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
-import { AppRoutingPaths, DescripcionesPantallas, TitleScreen } from "@constants";
+import { Box, Grid, useMediaQuery, useTheme, Typography } from "@mui/material";
+import { AppRoutingPaths, TitleScreen } from "@constants";
 import { TituloIcon } from "../../molecules/TituloIcon/TituloIcon";
-import { Typography } from "../../atoms/Typography/Typography";
 import { Home } from "@iconsCustomizeds";
 import Button from "../../atoms/Button/Button";
 import { useNavigate } from "react-router-dom";
@@ -23,15 +22,19 @@ const PlanEstudio: React.FC = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const betweenDevice = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-    const {data: materiaData, isLoading } = useGetPlanEstudio();
-    const { mapaCurricular, video } = useGetVideoMapa();
-    
+
+    const { refetchMapeado } = useGetPlanEstudio({ enabled: false });
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const { mapaCurricular, video, dataModulo: planEstudioData } = useGetVideoMapa();
+    const [materiaData, setMateriaData] = React.useState<PlanEstudioMateriasResponse[]>([]);
+
     const [isOpenVideo, setIsOpenVideo] = React.useState(false);
     const [urlVideo, setUrlVideo] = React.useState("");
 
     const [isOpenInscribirmeDialog, setIsOpenInscribirmeDialog] = React.useState(false);
 
-    const goToInformacion = (id_curso: number) => navigate(AppRoutingPaths.PLAN_ESTUDIO_INFORMACION.replace(":id",`${id_curso}`));
+    const goToInformacion = (id_curso: number) => navigate(AppRoutingPaths.PLAN_ESTUDIO_INFORMACION.replace(":id", `${id_curso}`));
 
     const [value, setValue] = React.useState(0);
     const [tabPreviewSelected, setPreviewTabSelected] = React.useState(0);
@@ -41,8 +44,24 @@ const PlanEstudio: React.FC = () => {
         const indexTab = getTabSelected('plan-estudio');
         setValue(indexTab);
         setPreviewTabSelected(indexTab);
-    },[]);
+    }, []);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                
+                const response = await refetchMapeado();
+                
+                setMateriaData(response ?? []);
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const handleVideoBienvenida = () => {
         setUrlVideo(video.data?.url ?? "");
@@ -50,22 +69,22 @@ const PlanEstudio: React.FC = () => {
     }
 
     const handleAction = (materia: Materia) => {
-        if(materia.status === "Inscribirme") {
+        if (materia.status === "Inscribirme") {
             setIdCursoSelected(materia.id_curso);
             setIsOpenInscribirmeDialog(true);
-        }else if(materia.status === "Cursando") {
+        } else if (materia.status === "Cursando") {
             setCursoSelected(JSON.stringify(materia));
             navigate(AppRoutingPaths.CURSOS_ACTIVOS_DETALLES.replace(":id", `${materia.id_curso}`));
         }
     }
 
     const handleMapaCurricular = () => {
-        if(mapaCurricular) window.open(mapaCurricular.data?.url, "_blank");
+        if (mapaCurricular) window.open(mapaCurricular.data?.url, "_blank");
     };
 
     const handleConfirmar = (_isConfirmar: boolean) => {
         setIsOpenInscribirmeDialog(false);
-    }    
+    }
 
     const InformacionStatusButtons = (materia: Materia, color: "success" | "primary" | "info" | "warning" | undefined) => (
         <Box sx={{ paddingTop: '8px', display: 'flex', gap: '15px', justifyContent: 'space-between' }}>
@@ -73,9 +92,9 @@ const PlanEstudio: React.FC = () => {
                 <Button onClick={() => goToInformacion(materia.id_curso)} fullWidth variant="outlined">Información</Button>
             </>
             <>
-                <Button 
+                <Button
                     fullWidth
-                    onClick={() => handleAction(materia)} 
+                    onClick={() => handleAction(materia)}
                     color={color}
                 >{materia.status}</Button>
             </>
@@ -84,35 +103,35 @@ const PlanEstudio: React.FC = () => {
 
     const materiaItem = (materia: Materia, isDesktop = true) => {
         let color: "success" | "primary" | "info" | "warning" | undefined;
-        if(materia.status === 'Finalizada') {
+        if (materia.status === 'Finalizada') {
             color = "success";
-        }else if(materia.status === "Cursando"){
-            color = "warning";        
+        } else if (materia.status === "Cursando") {
+            color = "warning";
         } else {
             color = undefined;
         }
 
         return (
-            isDesktop ? 
-                <Box sx={{ borderBottom: '2px solid #AAB1B6'}}>
-                    <Grid container sx={{ display: 'flex', alignItems: 'center', height: '80px'}}>
-                        <Grid size={{md: 6}}>
+            isDesktop ?
+                <Box sx={{ borderBottom: '2px solid #AAB1B6' }}>
+                    <Grid container sx={{ display: 'flex', alignItems: 'center', height: '80px' }}>
+                        <Grid size={{ md: 6 }}>
                             <Typography component="span" variant="body2">
                                 {materia.titulo}
                             </Typography>
                         </Grid>
-                        <Grid size={{md: 6}}>
+                        <Grid size={{ md: 6 }}>
                             {InformacionStatusButtons(materia, color)}
                         </Grid>
                     </Grid>
                 </Box>
-            :
-            <Box>
-                <Typography component="span" variant="body2">
-                    {materia.titulo}
-                </Typography>
-                {InformacionStatusButtons(materia, color)}
-            </Box>
+                :
+                <Box>
+                    <Typography component="span" variant="body2">
+                        {materia.titulo}
+                    </Typography>
+                    {InformacionStatusButtons(materia, color)}
+                </Box>
         )
     };
 
@@ -136,7 +155,7 @@ const PlanEstudio: React.FC = () => {
 
     const handleTabChange = (val: number) => {
         setValue(val);
-        setTabSelected({tab: 'plan-estudio', index: val});
+        setTabSelected({ tab: 'plan-estudio', index: val });
     }
 
     const TabsSection = (periodos: number[]) => (
@@ -145,7 +164,7 @@ const PlanEstudio: React.FC = () => {
 
     const ListadoMateriaVistaMobil = (data: PlanEstudioMateriasResponse[], periodos: number[]) => (
         <Grid container>
-            <Grid size={{md: 12}} sx={{ width: '100%'}}>
+            <Grid size={{ md: 12 }} sx={{ width: '100%' }}>
                 {
                     TabsSection(periodos)
                 }
@@ -171,53 +190,49 @@ const PlanEstudio: React.FC = () => {
 
     const ListadoMateriasVistaDesktop = (data: PlanEstudioMateriasResponse[], periodos: number[]) => (
         <Grid container>
-            <Grid size={{md: 12}} sx={{ width: '100%'}}>
-                {                                
+            <Grid size={{ md: 12 }} sx={{ width: '100%' }}>
+                {
                     !betweenDevice ?
-                    <>
-                        {
-                            TabsSection(periodos)
-                        }
-                        {
-                            periodos.map((_, i) => (
-                                <TabPanel value={value} index={i} key={i}>
-                                    <Box sx={{ p:4}}>
-                                        <TituloIcon Titulo={`Periodo ${toRoman(i + 1)} - Tus materias`} fontSize="h3" />
-                                        {
-                                            data && data.filter((item) => item.id === i).map((item, kix) => (
-                                                <Box key={kix} sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column'}}>
-                                                    {item.materias.map((materia: Materia, idx: number) => (
-                                                        <Box key={idx}>
-                                                            {materiaItem(materia, true)}
-                                                        </Box>
-                                                    ))}
-                                                </Box>
-                                            ))
-                                        }
-                                    </Box>                                                
-                                </TabPanel>
-                            ))
-                        }
-                    </>
-                    :
-                    ListadoMateriaVistaMobil(data, periodos)
-                }                            
+                        <>
+                            {
+                                TabsSection(periodos)
+                            }
+                            {
+                                periodos.map((_, i) => (
+                                    <TabPanel value={value} index={i} key={i}>
+                                        <Box sx={{ p: 4 }}>
+                                            <TituloIcon Titulo={`Periodo ${toRoman(i + 1)} - Tus materias`} fontSize="h3" />
+                                            {
+                                                data && data.filter((item) => item.id === i).map((item, kix) => (
+                                                    <Box key={kix} sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column' }}>
+                                                        {item.materias.map((materia: Materia, idx: number) => (
+                                                            <Box key={idx}>
+                                                                {materiaItem(materia, true)}
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                ))
+                                            }
+                                        </Box>
+                                    </TabPanel>
+                                ))
+                            }
+                        </>
+                        :
+                        ListadoMateriaVistaMobil(data, periodos)
+                }
             </Grid>
         </Grid>
     );
 
     const Listado = () => {
         const data = materiaData || [];
-        
-        if(isLoading) {
-            return <LoadingCircular Text="Cargando Plan de Estudio..."/>;
-        }else{
-            if(data.length > 0) {
-                if(isMobile) {
-                    return ListadoMateriaVistaMobil(data, data.map((item) => item.periodo));
-                }else{
-                    return ListadoMateriasVistaDesktop(data, data.map((item) => item.periodo));
-                }
+
+        if (data.length > 0) {
+            if (isMobile) {
+                return ListadoMateriaVistaMobil(data, data.map((item) => item.periodo));
+            } else {
+                return ListadoMateriasVistaDesktop(data, data.map((item) => item.periodo));
             }
         }
     };
@@ -225,35 +240,36 @@ const PlanEstudio: React.FC = () => {
     return (
         <>
             {
-                isMobile 
-                ? 
-                <>
-                    <TituloIcon Titulo={TitleScreen.PLAN_ESTUDIOS} Icon={ Home } />
-                    <Typography component="span" variant="body1">
-                        {DescripcionesPantallas.PLAN_ESTUDIO}
-                    </Typography>
-                    {BotonesVideoMapa()}
-                    {Listado()}
-                </>
+                isLoading 
+                ?
+                <LoadingCircular Text="Cargando Plan de Estudio..." />
                 :
-                <>
-                    <ContainerDesktop 
-                        title={TitleScreen.PLAN_ESTUDIOS} 
-                        description={DescripcionesPantallas.PLAN_ESTUDIO}
-                        actions={
-                            BotonesVideoMapa(!betweenDevice ? "column" : "row")
-                        }
-                    >
-                        {
-                            Listado()
-                        }
-                    </ContainerDesktop>
-                </>
+                isMobile
+                    ?
+                        <>
+                            <TituloIcon Titulo={TitleScreen.PLAN_ESTUDIOS} Icon={Home} />
+                            <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: planEstudioData?.data?.data.descripcion_html ?? '' }}>
+                            </Typography>
+                            {BotonesVideoMapa()}
+                            {Listado()}
+                        </>
+                    :
+                        <ContainerDesktop
+                            title={TitleScreen.PLAN_ESTUDIOS}
+                            description={planEstudioData?.data?.data.descripcion_html ?? ''}
+                            actions={
+                                BotonesVideoMapa(!betweenDevice ? "column" : "row")
+                            }
+                        >
+                            {
+                                Listado()
+                            }
+                        </ContainerDesktop>
             }
             <VideoBienvenidaDialog isOpen={isOpenVideo} close={() => setIsOpenVideo(false)} urlVideo={urlVideo} />
             <InscribirmeDialog idCurso={idCursoSelected} isOpen={isOpenInscribirmeDialog} close={(isConfirmar: boolean) => handleConfirmar(isConfirmar)} />
         </>
-        
+
     );
 };
 
