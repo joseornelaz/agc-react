@@ -32,7 +32,7 @@ export const ForosCursos: React.FC = () => {
             !isMobile && { width: '300px' },
             isMobile && { pb: 2 }
         ]}>
-            <Button onClick={() => window.open(manuales[0].url_archivo, '_blank')} fullWidth>Instrumento de Evaluación</Button>
+            <Button onClick={() => window.open(manuales[0].url_archivo, '_blank')} disabled={manuales[0].url_archivo?.length === 0} fullWidth>Instrumento de Evaluación</Button>
         </Box>
     )
 
@@ -45,7 +45,7 @@ export const ForosCursos: React.FC = () => {
 
             <Accordion key={index}
                 title={`Unidad ${toRoman(Number(unidad))}`}
-                customHeader={!isMobile ? <AccordionStatus tittle={contenidos?.[0]?.modulo} status={contenidos?.[0]?.estatus_respuesta} /> : undefined}
+                customHeader={!isMobile ? <AccordionStatus tittle={`Unidad ${toRoman(Number(unidad))} - ${contenidos?.[0]?.titulo_elemento}`} status={contenidos?.[0]?.estatus_respuesta} /> : undefined}
                 sxProps={accordionStyle}>
                 {
                     isMobile && <TituloIcon key={1} Titulo={'Foros'} Icon={Foros} />

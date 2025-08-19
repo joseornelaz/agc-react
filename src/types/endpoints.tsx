@@ -3,6 +3,7 @@ export const LOGIN_ENDPOINTS = {
     POST_LOGIN: { path: '/auth/login' },
     POST_LOGOUT: { path: '/auth/logout' },
     POST_NEW_PASSWORD: { path: '/auth/complete-new-password' },
+    GET_PLAN_ESTUDIO: { path: '/plan-estudios/perfil-programa', key: 'plan-estudio-url' },
 }
 
 export const NOTIFICATIONS_ENDPOINTS = {
@@ -91,7 +92,8 @@ export const CONSEJERIA_ESTUDIANTIL = {
 }
 
 export const TERMINOS_CONDICIONES = {
-    POST_TERMINOS: { path: '/documentos/tyc/aceptar' }
+    POST_TERMINOS: { path: '/documentos/tyc/aceptar' },
+    GET_TERMINOS: { path: '/documentos/tyc', key: 'terminos-condiciones' },
 }
 
 export const MODULOS_CAMPUS = {
