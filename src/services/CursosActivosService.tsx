@@ -3,7 +3,10 @@ import { apiClient } from './ApiConfiguration/httpClient';
 import { CURSOS_ACTIVOS_ENDPOINTS } from "../types/endpoints";
 import type { Actividad, CursosActividadesResponse, CursosActivosResponse, CursosTabs, CursosTabsResponse, CursosTutoriasResponse, ActividadEntregadaResponse, ListaPendientes } from '@constants';
 import React from 'react';
-import type { CursosForosResponse, CursosListaPendientesResponse, ManualesActividad } from '../types/Cursos.interface';
+import type { CursosForosResponse, CursosListaPendientesResponse } from '../types/Cursos.interface';
+import type { EncuestasResponse } from '../types/Encuestas.interface';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutingPaths } from "@constants";
 
 export const useGetCursos = () => {
     return useQuery<CursosActivosResponse, Error>({
@@ -31,13 +34,12 @@ export const useGetCursosTabs = (id: number, tab: string) => {
 
     const mapData = (data: CursosTabs[]) => {
         const agrupadoPorUnidad = data.reduce<Record<string, CursosTabs[]>>((acc, contenido) => {
-            if (!acc[contenido.unidad]) {
-                acc[contenido.unidad] = [];
+            if (!acc[contenido.titulo_elemento]) {
+                acc[contenido.titulo_elemento] = [];
             }
-            acc[contenido.unidad].push(contenido);
+            acc[contenido.titulo_elemento].push(contenido);
             return acc;
-            }, {});
-        
+        }, {});
         return agrupadoPorUnidad;
     }
 
@@ -50,37 +52,60 @@ export const useGetCursosTabs = (id: number, tab: string) => {
     }
 };
 
-export type ActividadesCacheData = {
-  agrupadoPorUnidad: Record<string, Actividad[]>;
-  manuales: ManualesActividad[];
+export const useGetContenidoTabs = (id: number, tab: string) => {
+    const idRecurso = TabsCursos.find((item) => item.tipo === tab)?.id_tipo_recurso;
+    const navigate = useNavigate();
+
+    const query = useQuery<CursosTabsResponse, Error>({
+        queryKey: [
+            CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key,
+            tab,
+            id,
+        ],
+        queryFn: () =>
+            apiClient.get<CursosTabsResponse>(
+                `${CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.path}?id_curso=${id}&id_tipo_recurso=${idRecurso}`
+            ),
+    });
+
+    React.useEffect(() => {
+        if (query.isError || query.data?.success === false) {
+            navigate(AppRoutingPaths.CURSOS_ACTIVOS);
+        }
+    }, [query.isError, query.data, navigate]);
+
+    return query;
 };
 
-export const useGetActividades = (id: number, tab: string): UseQueryResult<CursosActividadesResponse> & { dataMapped?: ActividadesCacheData;} => {
+export type ActividadesCacheData = {
+    agrupadoPorUnidad: Record<string, Actividad[]>;
+};
+
+export const useGetActividades = (id: number, tab: string): UseQueryResult<CursosActividadesResponse> & { dataMapped?: ActividadesCacheData; } => {
     const idRecurso = TabsCursos.find((item) => item.tipo === tab)?.id_tipo_recurso;
 
     const query = useQuery<CursosActividadesResponse, Error>({
         queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, tab, id],
         queryFn: () =>
-        apiClient.get<CursosActividadesResponse>(
-            `${CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.path}?id_curso=${id}&id_tipo_recurso=${idRecurso}`
-        ),
+            apiClient.get<CursosActividadesResponse>(
+                `${CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.path}?id_curso=${id}&id_tipo_recurso=${idRecurso}`
+            ),
     });
 
     const dataMapped = React.useMemo<ActividadesCacheData | undefined>(() => {
         if (!query.data) return undefined;
 
         const actividades = query.data.data.actividades ?? [];
-        const manuales = query.data.data.manual ?? [];
+        // const manuales = query.data.data.manual ?? [];
 
         const agrupadoPorUnidad = actividades.reduce<Record<string, Actividad[]>>((acc, contenido) => {
-            if (!acc[contenido.unidad]) acc[contenido.unidad] = [];
-            acc[contenido.unidad].push(contenido);
+            if (!acc[contenido.titulo_elemento]) acc[contenido.titulo_elemento] = [];
+            acc[contenido.titulo_elemento].push(contenido);
             return acc;
         }, {});
 
         return {
             agrupadoPorUnidad,
-            manuales,
         };
 
     }, [query.data]);
@@ -91,23 +116,31 @@ export const useGetActividades = (id: number, tab: string): UseQueryResult<Curso
     };
 };
 
-export const updateActividad = async (data: { id_recurso: number, contenido: string, archivos: File[], archivos_eliminar: any[], id_entrega:number | null }): Promise<ActividadEntregadaResponse> => {
-  const payload = { id_recurso: data.id_recurso, contenido: data.contenido, archivos_eliminar: data.archivos_eliminar, id_entrega: data.id_entrega };
-  console.log(payload);
-  const encryptedPayload = await apiClient.encryptData(payload);
 
-  const formData = new FormData();
-  formData.append("data", encryptedPayload);
+export const updateActividad = async (data: { id_recurso: number; contenido: string; archivos: File[]; archivos_eliminar: any[]; id_entrega: number | null; }): Promise<ActividadEntregadaResponse> => {
 
-  data.archivos.forEach((archivo) => {
-    formData.append("archivos", archivo);
-  });
+    const payload = {
+        id_recurso: data.id_recurso,
+        contenido: data.contenido,
+        archivos_eliminar: data.archivos_eliminar,
+        id_entrega: data.id_entrega,
+    };
 
-  return await apiClient.post<ActividadEntregadaResponse>(
-    CURSOS_ACTIVOS_ENDPOINTS.POST_ACTIVIDADES.path,
-    formData
-  );
+    const BASE_URL_ACTIVIDADES = import.meta.env.VITE_APP_ACTIVITIES_API_BASE_URL;
+    const encryptedPayload = await apiClient.encryptData(payload);
+
+    const formData = new FormData();
+    formData.append('data', encryptedPayload);
+    data.archivos.forEach((archivo) => formData.append('archivos', archivo));
+
+    const client = apiClient.withBaseUrl(BASE_URL_ACTIVIDADES);
+
+    return await client.post<ActividadEntregadaResponse>(
+        CURSOS_ACTIVOS_ENDPOINTS.POST_ACTIVIDADES.path,
+        formData
+    );
 };
+
 
 export const useGetTutorias = (id: number, tab: string) => {
     const idRecurso = TabsCursos.find((item) => item.tipo === tab)?.id_tipo_recurso;
@@ -154,32 +187,45 @@ export const useGetListaPendientes = (id: number) => {
 export const useGetForosManuales = (id: number, tab: string) => {
     const idRecurso = TabsCursos.find((item) => item.tipo === tab)?.id_tipo_recurso;
 
-    const query = useQuery<CursosForosResponse, Error>({
+    return useQuery<CursosForosResponse, Error>({
         queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, tab, id],
         queryFn: () =>
-        apiClient.get<CursosForosResponse>(
-            `${CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.path}?id_curso=${id}&id_tipo_recurso=${idRecurso}`
-        ),
+            apiClient.get<CursosForosResponse>(
+                `${CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.path}?id_curso=${id}&id_tipo_recurso=${idRecurso}`
+            ),
+    });
+};
+
+export const useGetEncuestas = (options?: { enabled?: boolean }) => {
+    const query = useQuery<EncuestasResponse, Error>({
+        queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_ENCUESTAS_ASIGNACIONES.key],
+        queryFn: async () => await apiClient.get<EncuestasResponse>(`${CURSOS_ACTIVOS_ENDPOINTS.GET_ENCUESTAS_ASIGNACIONES.path}`),
+        staleTime: 1000 * 60 * 5, // 5 minutos de stale time
+        ...options
     });
 
-    const mapData = (data: CursosTabs[], manuales: ManualesActividad[]) => {
-        
-        const agrupadoPorUnidad = data.reduce<Record<string, CursosTabs[]>>((acc, contenido) => {
-            if (!acc[contenido.unidad]) {
-                acc[contenido.unidad] = [];
-            }
-            acc[contenido.unidad].push(contenido);
-            return acc;
-            }, {});
-        
-        return {agrupadoPorUnidad, manuales };
-    }
+    return query
+};
 
-    return {
-        ...query,
-        data: React.useMemo(
-            () => mapData(query.data?.data.foros ?? [], query.data?.data.manual ?? []),
-            [query.data]
-        )
-    }
+
+type SaveEncuestaPayload = {
+    respuestas: any;
+    id_asignacion: number;
+};
+
+export const SaveEncuesta = async (payload: SaveEncuestaPayload): Promise<EncuestasResponse> => {
+    const { id_asignacion, respuestas } = payload;
+
+    const encryptedPayload = await apiClient.encryptData({ respuestas });
+
+    return await apiClient.post<EncuestasResponse>(
+        `${CURSOS_ACTIVOS_ENDPOINTS.SET_ENCUESTAS_ASIGNACIONES.path}/${id_asignacion}/respuestas`,
+        { data: encryptedPayload }
+    );
+};
+
+export const updateVideoVisto = async (): Promise<EncuestasResponse> => {
+    return await apiClient.post<EncuestasResponse>(
+        `${CURSOS_ACTIVOS_ENDPOINTS.POST_VIDEO_VISTO.path}`,
+    );
 };

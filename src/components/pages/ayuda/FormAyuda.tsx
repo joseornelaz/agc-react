@@ -9,6 +9,7 @@ import { useCreateAyuda, useCreateAyudaAlumnos, useGetTemas } from "../../../ser
 import { TextMaskCustom } from "../../molecules/TextMask/TextMask";
 import { useNotification } from "../../../providers/NotificationProvider";
 import { AYUDA_ENDPOINTS } from "../../../types/endpoints";
+import { loadConfig } from "../../../config/configStorage";
 
 type FormAyudaProps = {
     isLogin?: boolean;
@@ -19,6 +20,14 @@ export const FormAyuda: React.FC<FormAyudaProps> = ({isLogin = true}) => {
     const [loading, setLoading] = React.useState(false);
     const { data: asuntoData, isLoading }= useGetTemas();
     const queryClient = useQueryClient();
+
+    const [config, setConfig] = React.useState<any>(null);
+      
+    React.useEffect(() => {
+        loadConfig().then(cfg => {
+            setConfig(cfg);
+        });
+    }, []);
 
     const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm<AyudaFormData>({
         resolver: zodResolver(
@@ -39,16 +48,16 @@ export const FormAyuda: React.FC<FormAyudaProps> = ({isLogin = true}) => {
     const onSubmit = async (data: AyudaFormData) => {
         setLoading(true);
         if(isLogin){
-            createMutationLogin.mutate({...data, id_plan_estudio: 1});
+            createMutationLogin.mutate({...data, id_plan_estudio: config?.data?.id_plan_estudio});
         }else{
-            createMutationAlumnos.mutate({...data, id_plan_estudio: 1});
+            createMutationAlumnos.mutate({...data, id_plan_estudio:  config?.data?.id_plan_estudio});
         }
     };
 
     const createMutationLogin = useMutation({
         mutationFn: useCreateAyuda,
         onSuccess: () => {
-            showNotification(`Solicitud de Ayuda enviada satisfactorimente`,"success");
+            showNotification(`Hemos recibido tu solicitud. Nuestro equipo te responderá via correo electrónico en un máximo de 24 hrs.`,"success");
             reset();
             setLoading(false);
         },
@@ -64,7 +73,7 @@ export const FormAyuda: React.FC<FormAyudaProps> = ({isLogin = true}) => {
     const createMutationAlumnos = useMutation({
         mutationFn: useCreateAyudaAlumnos,
         onSuccess: () => {
-            showNotification(`Solicitud de Ayuda enviada satisfactorimente`,"success");
+            showNotification(`Hemos recibido tu solicitud. Nuestro equipo te responderá via correo electrónico en un máximo de 24 hrs.`,"success");
             reset();
             setLoading(false);
             queryClient.invalidateQueries({ queryKey: [AYUDA_ENDPOINTS.GET_AYUDA.key] });

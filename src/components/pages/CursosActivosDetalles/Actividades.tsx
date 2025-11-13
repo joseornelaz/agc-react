@@ -6,7 +6,7 @@ import { accordionStyle, flexColumn, flexRows, innerHTMLStyle } from "@styles";
 import { useParams } from "react-router-dom";
 import { updateActividad, useGetActividades } from "../../../services/CursosActivosService";
 import { LoadingCircular } from "../../molecules/LoadingCircular/LoadingCircular";
-import { convertRemoteToPreviewFile, toRoman } from "../../../utils/Helpers";
+import { convertRemoteToPreviewFile } from "../../../utils/Helpers";
 import { Typography } from "../../atoms/Typography/Typography";
 import { FileUploader } from "../../molecules/FileUploader/FileUploader";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +15,12 @@ import { useNotification } from "../../../providers/NotificationProvider";
 import { AccordionStatus } from "../../molecules/AccordionStatus/AccordionStatus";
 import StatusIcon from "../../molecules/StatusIcon/StatusIcon";
 import { RetroalimentacionDialog } from "../../molecules/Dialogs/RetroalimentacionDialog/RetroalimentacionDialog";
+import { GenericDialog } from "../../molecules/Dialogs/GenericDialog/GenericDialog";
 import { CURSOS_ACTIVOS_ENDPOINTS } from "../../../types/endpoints";
+import { ManualsButton } from "../../molecules/ManualsButton/ManualsButton";
+import { TipoManualesIds } from "@constants";
+import React from "react";
+import { usePlanEstudio } from "../../../context/PlanEstudioContext";
 
 type PreviewFile = {
     file: File;
@@ -24,13 +29,16 @@ type PreviewFile = {
 
 export const Actividades: React.FC = () => {
     const theme = useTheme();
+    const { config: configPlanEstudio } = usePlanEstudio();
+
     const queryClient = useQueryClient();
     const { showNotification } = useNotification();
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const betweenDevice = useMediaQuery(theme.breakpoints.between('sm', 'md'));
     const [isSaving, setIsSaving] = useState(false);
-
+    const [totalPalabras, setTotalPalabras] = useState<Record<string, number | boolean>>({});
+    const [isOpenAvisoActividad, setIsOpenAvisoActividad] = useState(false);
     const { id } = useParams<{ id: string }>();
     const { dataMapped, isLoading } = useGetActividades(Number(id!), "Actividades");
 
@@ -39,7 +47,28 @@ export const Actividades: React.FC = () => {
     const [archivosPorId, setArchivosPorId] = useState<Record<number, PreviewFile[]>>({});
     const [contenido, setContenido] = useState<Record<number, string>>({});
     const [openRetroDialog, setOpenRetroDialog] = useState(false);
+    const [idRecursoPending, setIdRecursoPending] = useState(0);
     const [retroalimentacion, setRetroalimentacion] = useState<string>("");
+
+    const [verBotones, setVerBotones] = useState(true);
+    const [verCalificacion, setVerCalificacion] = useState(true);
+    const [subirArchivos, setSubirArchivos] = useState(true);
+
+    const manuales = [
+        TipoManualesIds.INSTRUMENTO_EVALUACION,
+        TipoManualesIds.PORTADA,
+        TipoManualesIds.MANUAL_APA,
+        TipoManualesIds.ACTIVIDADES_INTEGRATORIAS
+    ];
+
+    React.useEffect(() => {
+        const config = configPlanEstudio?.getConfiguracionActividades({verBotones: true, verCalificacion: true, subirArchivos: true});
+        if(config) {
+            setVerBotones(config.verBotones);
+            setVerCalificacion(config.verCalificacion);
+            setSubirArchivos(config.subirArchivos);
+        }
+    }, [configPlanEstudio]);
 
     const handleFilesChange = (id: number, files: PreviewFile[]) => {
         setArchivosPorId((prev) => ({
@@ -48,12 +77,36 @@ export const Actividades: React.FC = () => {
         }));
     };
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>, id: number) => {
-        setContenido((prev) => ({
-            ...prev,
-            [id]: event.target.value
-        }));
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: number, field: any) => {
+        const valor = event.target.value;
+        const palabras = valor.trim().split(/\s+/).filter(Boolean);
+        const total = palabras.length;
+
+        const LIMITE = 5000;
+        const ADVERTENCIA = 4800;
+
+        const valorAnterior = contenido[id] ?? "";
+
+        if (total > LIMITE) {
+            showNotification("Has alcanzado el límite máximo de 5000 palabras.", "warning");
+            field.onChange(valorAnterior);
+            return;
+        }
+        if (total >= ADVERTENCIA && total < LIMITE && !totalPalabras[id + "_alertado"]) {
+            showNotification("Estás a punto de llegar al límite de 5000 palabras.", "warning");
+            setTotalPalabras((prev) => ({
+                ...prev,
+                [id + "_alertado"]: true,
+            }));
+        }
+
+        field.onChange(valor);
+        setContenido((prev) => ({ ...prev, [id]: valor }));
+        setTotalPalabras((prev) => ({ ...prev, [String(id)]: total }));
     };
+
+
+
 
     const handleEditActivity = async (id_recurso: number) => {
         const archivos = archivosPorId[id_recurso].map((item) => item.file.name);
@@ -95,28 +148,45 @@ export const Actividades: React.FC = () => {
         createMutationActivity.mutate({ id_recurso, contenido: contenidoText, archivos: files, archivos_eliminar, id_entrega });
     };
 
+    const handleShowDialog = (id_recurso: number) => {
+        setIsOpenAvisoActividad(true);
+        setIdRecursoPending(id_recurso);
+    }
+
     const handleSaveActivity = (id_recurso: number) => {
         setIsSaving(true);
         const contenidoText = contenido[id_recurso] || '';
         const archivos = archivosPorId[id_recurso] || [];
         const files = archivos.map((item) => item.file);
+
+        if (files.length === 0 && contenidoText.length === 0) {
+            setIsSaving(false);
+            showNotification(`Debes dejar un comentario`, "warning");
+            return;
+        }
+
         createMutationActivity.mutate({ id_recurso, contenido: contenidoText, archivos: files, archivos_eliminar: [], id_entrega: null });
     }
 
     const createMutationActivity = useMutation({
         mutationFn: updateActividad,
         onSuccess: async () => {
-            showNotification(`La actividades se guardo satisfactoriamente`, "success");
+            showNotification(`La actividad se guardo satisfactoriamente`, "success");
 
-            await queryClient.invalidateQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, "Actividades", Number(id!)] });            
+            await queryClient.invalidateQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, "Actividades", Number(id!)], exact: true });
+            await queryClient.resetQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, "Contenido", Number(id!)], exact: true });
+            await queryClient.resetQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_LISTA_PROGRESO.key] });
             setIsSaving(false);
-            
+            setIsOpenAvisoActividad(false);
+
             await queryClient.invalidateQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_MATERIAS.key] });
         },
         onError: (error) => {
             console.error(error);
             showNotification(`Error al registrar: ${error.message}`, "error");
             setIsSaving(false);
+            setIsOpenAvisoActividad(false);
+
         },
         onSettled: () => {
             console.log('La mutación ha finalizado');
@@ -185,8 +255,86 @@ export const Actividades: React.FC = () => {
         }
     }
 
-    const handleLink = (link: string) => {
-        window.open(link, '_blank');
+    const handleCloseGenericDialog = (isConfirmar: boolean) => {
+        if (isConfirmar) {
+            handleSaveActivity(idRecursoPending);
+        } else {
+            setIsOpenAvisoActividad(false);
+        }
+    };
+
+    const handleOnPaste = (
+        e: React.ClipboardEvent<HTMLElement>,
+        id: number,
+        contenido: Record<number, string>,
+        showNotificationFn: (...args: any[]) => void
+    ) => {
+        const pastedText = e.clipboardData.getData("text");
+        const palabrasPegadas = pastedText.trim().split(/\s+/).filter(Boolean).length;
+        const palabrasActuales =
+            (contenido[id]?.trim().split(/\s+/).filter(Boolean).length) || 0;
+        const LIMITE = 5000;
+
+        if (palabrasActuales + palabrasPegadas > LIMITE) {
+            e.preventDefault();
+            showNotificationFn("El texto pegado supera el límite de 5000 palabras.", "warning");
+        }
+    };
+
+
+
+    const Files = (item: any) => {
+        return (
+            <>
+                <Box sx={{ display: 'flex', width: '100%', gap: '8px' }}>
+                    <Typography component="p" variant="body1" color="primary">
+                        Sube tu archivo aquí
+                    </Typography>
+                    <Typography component="p" variant="body1">
+                        (pdf. xml. word, ppt)
+                    </Typography>
+                </Box>
+                <FileUploader
+                    files={archivosPorId[item.id_recurso] || []}
+                    onFilesChange={(files) => handleFilesChange(item.id_recurso, files)}
+                    maxFiles={3} maxFileSizeMb={3}
+                    canUpload={item.calificacion === null}
+                />
+                {
+                    item.hasEntrega === 1
+                        ?
+                        item.calificacion === null && <Box sx={{ ...flexRows, gap: '20px', mt: 2 }}>
+                            <>
+                                <Button
+                                    fullWidth
+                                    onClick={() => handleEditActivity(item.id_recurso)}
+                                    isLoading={isSaving}
+                                >
+                                    Modificar
+                                </Button>
+                            </>
+                            <>
+                                <Button
+                                    fullWidth
+                                    onClick={() => handleCancel(item.id_recurso)}
+                                    variant="outlined"
+                                >
+                                    Cancelar
+                                </Button>
+                            </>
+                        </Box>
+                        :
+                        item.calificacion === null && <Button
+                            fullWidth
+                            onClick={() => handleShowDialog(item.id_recurso)}
+                            sxProps={{ mt: 2 }}
+                            isLoading={isSaving}
+                        >
+                            Finalizar Actividad
+                        </Button>
+                }
+            </>
+        );
     }
 
     const ButtonSection = (isDesktop: boolean = true) => (
@@ -199,18 +347,17 @@ export const Actividades: React.FC = () => {
                 ]
             }
         >
-            {
-                !isLoading &&
-                <>
-                    {
-                        dataMapped?.manuales && Object.entries(dataMapped.manuales).map(([_, item], index) =>
-                            <Box sx={{ width: isDesktop ? '300px' : '100%' }} key={index}>
-                                <Button onClick={() => handleLink(item.url_archivo)} disabled={item.url_archivo?.length === 0} fullWidth >{item.titulo}</Button>
-                            </Box>
-                        )
-                    }
-                </>
-            }
+            <>
+                {
+                    !isLoading &&
+                    manuales.map((item, i) => (
+                        <Box sx={{ width: isDesktop ? '300px' : '100%' }} key={i}>
+                            <ManualsButton idTipoManual={item} />
+                        </Box>
+                    ))
+                }
+            </>
+
         </Box>
     );
 
@@ -219,14 +366,21 @@ export const Actividades: React.FC = () => {
         setOpenRetroDialog(true);
     }
 
+    const getLabel = (contenidos: any) => {
+        return contenidos?.[0]?.titulo_elemento;
+    }
+
     return (
         <>
+            {isSaving && (
+                <LoadingCircular Text="Guardando actividad..." isSaving />
+            )}
             {
                 isMobile
                     ?
-                    ButtonSection(!isMobile)
+                    verBotones && ButtonSection(!isMobile)
                     :
-                    ButtonSection(betweenDevice ? false : true)
+                    verBotones && ButtonSection(betweenDevice ? false : true)
             }
             {
                 isLoading
@@ -236,9 +390,9 @@ export const Actividades: React.FC = () => {
                     dataMapped?.agrupadoPorUnidad && Object.entries(dataMapped.agrupadoPorUnidad).map(([unidad, contenidos], index) =>
                         <Accordion
                             key={index}
-                            title={`Unidad ${toRoman(Number(unidad))}`}
+                            title={getLabel(contenidos)}
                             sxProps={accordionStyle}
-                            customHeader={!isMobile ? <AccordionStatus tittle={`Unidad ${toRoman(Number(unidad))} - ${contenidos?.[0]?.titulo_elemento}`} status={contenidos?.[0]?.estatus} /> : undefined}
+                            customHeader={!isMobile ? <AccordionStatus tittle={getLabel(contenidos)} status={contenidos?.[0]?.estatus} /> : undefined}
                         >
                             {
                                 isMobile && <Box sx={{ padding: '10px' }}>
@@ -247,21 +401,22 @@ export const Actividades: React.FC = () => {
                             }
 
                             {
-                                contenidos?.filter((item) => item.unidad === Number(unidad)).map((item, i) => (
+                                contenidos?.filter((item) => item.titulo_elemento === unidad).map((item, i) => (
                                     <Box
                                         key={i}
                                     >
                                         {
-                                            item.calificacion && 
+                                            item.calificacion &&
                                             <Box sx={[
-                                                    {...flexRows, justifyContent: 'space-between', pl: 3, pr: 3, borderBottom: `1px solid #E0E0E0`, pb: 1},
-                                                    isMobile && { flexDirection: 'column', gap: '10px' }
-                                                ]}>
-                                                <Box sx={{ display: 'flex', gap: '10px' }}>
-                                                    <Typography component="h3" variant="h3" color="primary">Calificación:</Typography>
-                                                    <Typography component="h3" variant="h3" >{ item.calificacion }</Typography>
-                                                </Box>
-                                                <Box sx={{ width: '250px'}}>
+                                                { ...flexRows, justifyContent: 'space-between', pl: 3, pr: 3, borderBottom: `1px solid #E0E0E0`, pb: 1 },
+                                                isMobile && { flexDirection: 'column', gap: '10px' }
+                                            ]}>
+                                                {verCalificacion &&
+                                                    <Box sx={{ display: 'flex', gap: '10px' }}>
+                                                        <Typography component="h3" variant="h3" color="primary">Calificación:</Typography>
+                                                        <Typography component="h3" variant="h3" >{item.calificacion}</Typography>
+                                                    </Box>}
+                                                <Box sx={{ width: '250px' }}>
                                                     {
                                                         item.retroalimentacion && <Button
                                                             fullWidth
@@ -274,18 +429,22 @@ export const Actividades: React.FC = () => {
                                                 </Box>
                                             </Box>
                                         }
-                                            
+
                                         <Box
                                             dangerouslySetInnerHTML={{ __html: item.contenido_elemento }}
-                                            sx={{...innerHTMLStyle}}
+                                            sx={{ ...innerHTMLStyle }}
                                         />
                                         <Box sx={{ pl: 3, pr: 3, pb: 3 }}>
                                             <Typography component="h4" variant="h4" sxProps={{ color: theme.palette.primary.main, fontFamily: theme.typography.fontFamily }}>
                                                 Entrega de actividad
                                             </Typography>
+
                                             <Box sx={{ pt: 2 }}>
                                                 <Typography component="p" variant="body1" color="primary">
                                                     Comentario:
+                                                </Typography>
+                                                <Typography component="p" variant="body1" sxProps={{ color: theme.palette.text.secondary, fontFamily: theme.typography.fontFamily }}>
+                                                    Total de palabras: {totalPalabras[String(item.id_recurso)] ?? 0}/5000
                                                 </Typography>
                                                 <Controller
                                                     name={`comentario.${item.id_recurso}`}
@@ -298,68 +457,39 @@ export const Actividades: React.FC = () => {
                                                             multiline
                                                             rows={5}
                                                             fullWidth
+                                                            disabled={item.hasEntrega === 1 ? true : false}
                                                             slotProps={{
                                                                 input: {
                                                                     inputProps: {
-                                                                        maxLength: 200
+                                                                        maxLength: 9999999
                                                                     },
                                                                 },
                                                             }}
-                                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                                                field.onChange(event); // necesario para que React Hook Form actualice el valor
-                                                                handleChange(event, item.id_recurso); // ← si tú quieres manejar algo extra
+                                                            onChange={(event) => handleChange(event, item.id_recurso, field)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === "Enter" && !e.shiftKey) {
+                                                                    e.preventDefault();
+                                                                }
                                                             }}
+                                                            onPaste={(e) => handleOnPaste(e, item.id_recurso, contenido, showNotification)}
                                                         />
                                                     )}
                                                 />
                                             </Box>
 
-                                            <Box sx={{ display: 'flex', width: '100%', gap: '8px' }}>
-                                                <Typography component="p" variant="body1" color="primary">
-                                                    Sube tu archivo aquí
-                                                </Typography>
-                                                <Typography component="p" variant="body1">
-                                                    (pdf. xml. word, ppt)
-                                                </Typography>
-                                            </Box>
-                                            <FileUploader
-                                                files={archivosPorId[item.id_recurso] || []}
-                                                onFilesChange={(files) => handleFilesChange(item.id_recurso, files)}
-                                                maxFiles={3} maxFileSizeMb={3}
-                                                canUpload={item.calificacion === null}
-                                            />
                                             {
-                                                item.hasEntrega === 1
-                                                    ?
-                                                        item.calificacion === null && <Box sx={{ ...flexRows, gap: '20px', mt: 2 }}>
-                                                            <>
-                                                                <Button
-                                                                    fullWidth
-                                                                    onClick={() => handleEditActivity(item.id_recurso)}
-                                                                    isLoading={isSaving}
-                                                                >
-                                                                    Modificar
-                                                                </Button>
-                                                            </>
-                                                            <>
-                                                                <Button
-                                                                    fullWidth
-                                                                    onClick={() => handleCancel(item.id_recurso)}
-                                                                    variant="outlined"
-                                                                >
-                                                                    Cancelar
-                                                                </Button>
-                                                            </>
-                                                        </Box>
-                                                    :
-                                                        item.calificacion === null && <Button
+                                                subirArchivos
+                                                    ? <Files item={item} />
+                                                    : (item.calificacion === null && (
+                                                        <Button
                                                             fullWidth
-                                                            onClick={() => handleSaveActivity(item.id_recurso)}
+                                                            onClick={() => handleShowDialog(item.id_recurso)}
                                                             sxProps={{ mt: 2 }}
                                                             isLoading={isSaving}
                                                         >
                                                             Finalizar Actividad
                                                         </Button>
+                                                    ))
                                             }
 
                                         </Box>
@@ -371,6 +501,7 @@ export const Actividades: React.FC = () => {
                     )
             }
             <RetroalimentacionDialog isOpen={openRetroDialog} close={() => setOpenRetroDialog(false)} retroalimentacion={retroalimentacion} />
+            <GenericDialog mensaje={"¡Atención! Una vez enviada, la actividad no puede modificarse. ¿Deseas enviarla?"} tipo="warning" isOpen={isOpenAvisoActividad} close={(isConfirmar: boolean) => handleCloseGenericDialog(isConfirmar)} />
         </>
     );
 };

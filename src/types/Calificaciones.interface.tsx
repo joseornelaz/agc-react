@@ -18,7 +18,9 @@ export interface CalificacionCurso {
     periodo:              number;
     id_inscripcion_curso: number;
     calificacion:         string;
+    url_accredible:       string;
     estatus_curso_alumno: string;
+    fecha_registro      : string;
 }
 
 export interface Glosario {
@@ -53,4 +55,14 @@ export interface PromediosPorCategoria {
     Actividades:  number;
     Evaluaciones: number;
     Foros:        number;
+}
+
+export interface BotonesCalificacionProps {
+    curso: CalificacionCurso;
+    loadingEncuesta: boolean;
+    encuestas: any; // Tipar correctamente según tu estructura
+    handleIrCurso: (curso: CalificacionCurso) => void;
+    handleReporteCurso: (htmlResult: string, titulo: string) => void;
+    handleDetalle: (idCurso: number) => void;
+    isMobile: boolean;
 }

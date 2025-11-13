@@ -1,49 +1,71 @@
-import { StrictMode } from 'react'
+import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom';
 import { AppRouting as router } from './AppRouting';
 import { QueryProvider } from './providers/QueryProvider';
 import './index.scss';
-import { Box, CssBaseline, Fade, LinearProgress, ThemeProvider, useMediaQuery, useTheme } from '@mui/material';
+
 import { AuthProvider } from './context/AuthContext';
+import { PlanEstudioProvider } from './context/PlanEstudioContext';
 import { NotificationProvider } from './providers/NotificationProvider';
-import { getPlataformaFromSubdomain } from './config/plataformaConfig';
 import { getThemeByPlataforma } from './themes';
 
 import { loadAppConfig } from './config/configLoader';
 import LogoAG from './assets/logo_ag.svg';
 
-const plataforma = getPlataformaFromSubdomain();
-const theme = getThemeByPlataforma(plataforma);
-
 import { useEffect, useState } from 'react';
+import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
+import Fade from '@mui/material/Fade';
+import CssBaseline from '@mui/material/CssBaseline';
 
 function AppLoader() {
   const themeMui = useTheme();
   const isMobile = useMediaQuery(themeMui.breakpoints.down('sm'));
-  // const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  const baseTheme = getThemeByPlataforma();
 
   useEffect(() => {
-    loadAppConfig().then(() => {
-      // setConfig(cfg);
+    loadAppConfig().then((cfg) => {
+      setConfig(cfg);
       setLoading(false);
-      // setTimeout(() => setLoading(false), 300);
     });
   }, []);
 
+  // fusionar theme base con el color dinámico de la API
+  const theme = useMemo(
+    () =>
+      createTheme({
+        ...baseTheme,
+        palette: {
+          ...baseTheme.palette,
+          primary: {
+            ...baseTheme.palette.primary,
+            main: config?.data.color_primary || baseTheme.palette.primary.main,
+          },
+        },
+      }),
+    [config, baseTheme]
+  );
+
   if (loading) {
     return <Box 
-            sx={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8F8F9' }}>
-      <Box sx={{ width: !isMobile ? '15%' : '50%', textAlign: 'center' }}>
-        <Box
-            component="img"
-            src={LogoAG}
-            sx={{ mb: 1 }}
-        />
-        <LinearProgress />
-      </Box>
-    </Box>;
+              sx={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8F8F9' }}
+            >
+              <Box sx={{ width: !isMobile ? '544px' : '50%', textAlign: 'center' }}>
+                <Box
+                    component="img"
+                    src={LogoAG}
+                    sx={{ mb: 4 }}
+                    width='100%'
+                />
+                  <LinearProgress/>
+              </Box>
+            </Box>;
   }
 
   return (
@@ -53,9 +75,11 @@ function AppLoader() {
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <AuthProvider>
-              <NotificationProvider>
-                <RouterProvider router={router} />
-              </NotificationProvider>
+              <PlanEstudioProvider>
+                <NotificationProvider>
+                  <RouterProvider router={router} />
+                </NotificationProvider>
+              </PlanEstudioProvider>
             </AuthProvider>
           </ThemeProvider>
         </QueryProvider>

@@ -1,15 +1,15 @@
 import { z } from "zod";
 
-export const terminosSchema = z.object({
- aceptoTerminos: z.boolean().refine(val => val === true, {
-    message: "Debes aceptar los términos",
-  }),
+
+const lineamientosField = {
   aceptoLineamientos: z.boolean().refine(val => val === true, {
-    message: "Debes aceptar los lineamientos",
+    message: "Debes aceptar los Términos y Condiciones",
   }),
-  aceptoAvisos: z.boolean().refine(val => val === true, {
-    message: "Debes aceptar el aviso de privacidad",
-  }),
+};
+
+export const terminosSchema = z.object({
+  ...lineamientosField,
 });
 
 export type TerminosFormData = z.infer<typeof terminosSchema>;
+

@@ -6,7 +6,7 @@ import type { NotificacionesReadAllResponse } from "../types/Notificaciones.inte
 
 export const useGetNotificacionesTopBar = () => {
     return useQuery<NotificacionesResponse, Error>({
-        queryKey: ['notificacionesTopBar'],
+        queryKey: [NOTIFICATIONS_ENDPOINTS.GET_NOTIFICATIONS_TOP_BAR.key],
         queryFn: async () => await apiClient.get<NotificacionesResponse>(NOTIFICATIONS_ENDPOINTS.GET_NOTIFICATIONS.path),
         refetchInterval: 1000 * 60 * 3, // 3 minutos
         refetchIntervalInBackground: true,

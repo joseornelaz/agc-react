@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Divider, Tab, Tabs, tabsClasses, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Divider, Link, Tab, Tabs, tabsClasses, Typography, useMediaQuery, useTheme } from "@mui/material";
 
 import CampusDigital from "../../../assets/campus_digital.jpg";
 import ServiciosEscolares from "../../../assets/servicios_escolares_contacto.jpg";
@@ -11,15 +11,25 @@ import { TituloIcon } from "../../molecules/TituloIcon/TituloIcon";
 import { flexColumn } from "@styles";
 import { useContactoInterno } from "../../../services/ContactoService";
 import { LoadingCircular } from "../../molecules/LoadingCircular/LoadingCircular";
+import { loadConfig } from "../../../config/configStorage";
+import { CellPhone, EmailContacto, WhatsAppContacto } from "@iconsCustomizeds";
+import { formatWithIMask } from "../../../utils/Helpers";
 
 
 const ContactoInterno: React.FC = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [value, setValue] = React.useState(1);
-    const { data: interno, isLoading } = useContactoInterno(1);
 
-    console.log(interno)
+    const [config, setConfig] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        loadConfig().then(cfg => {
+            setConfig(cfg);
+        });
+    }, []);
+
+    const { data: interno, isLoading } = useContactoInterno(config?.data?.id_plan_estudio);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -76,17 +86,20 @@ const ContactoInterno: React.FC = () => {
                                                 <Tab
                                                     key={index}
                                                     label={section.label}
-                                                    value={section.valor}
+                                                    value={index + 1}
                                                     sx={{ minWidth: '150px', padding: '0px' }}
                                                 />
                                             ))
                                         }
                                     </Tabs>
                                 </Box>
-                                {interno.map((section, index) => (
-                                    <TabPanel key={index + 1} value={value} index={index + 1}>
-                                        {Contenido(section)}
-                                    </TabPanel>))}
+                                {
+                                    interno.map((section, index) => (
+                                        <TabPanel key={index} value={value} index={index + 1}>
+                                            {Contenido(section)}
+                                        </TabPanel>
+                                    ))
+                                }
                             </>
                             :
                             <>
@@ -119,7 +132,7 @@ const ContactoInterno: React.FC = () => {
                             <Box component="img" src={images[section.valor]} sx={{ width: '260px', height: '138px' }}>
                             </Box>
                             <Divider textAlign="center">
-                                <Typography component="span" variant="subtitle1" color="primary" sx={{ fontWeight: 400, color: "#005A9BCC" }}>{section.label}</Typography>
+                                <Typography component="span" variant="subtitle1" color="primary" sx={{ fontWeight: 400, color: config?.data.color_primary }}>{section.label}</Typography>
                             </Divider>
                             <Typography component="span" variant="body1">
                                 {section.data.description}
@@ -130,22 +143,58 @@ const ContactoInterno: React.FC = () => {
 
                 <Box sx={{ ...flexColumn, alignItems: 'flex-start', mt: 1, gap: '17px' }}>
                     <Box sx={{ ...flexColumn, alignItems: 'flex-start', mb: 1 }}>
-                        <Typography component="h5" variant="h5" color="primary" sx={{ fontWeight: 400, color: theme.palette.primary.light }}>
+                        <Typography component="h5" variant="h5" color="primary" sx={{ fontWeight: 400, color: config?.data.color_primary }}>
                             Horarios de atención:
                         </Typography>
                         <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: section.data.horarios }} />
                     </Box>
-                    <Box sx={{ ...flexColumn, alignItems: 'flex-start', mb: 1 }}>
+                    <Box sx={{ ...flexColumn, alignItems: 'flex-start', mb: 1, gap: '5px' }}>
                         <Typography component="span" variant="body2" color="primary">
                             Teléfonos:
                         </Typography>
-                        <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: section.data.telefonos }} />
+
+                        {section.data.telefonos.map((item: any, index: number) => {
+                            if (item.tipo === "WhatsApp") {
+                                return (
+                                    <Box key={index} sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <WhatsAppContacto />
+                                        <Link
+                                            variant="body2"
+                                            href={item.url_contacto}
+                                            target="_blank"
+                                            sx={{ textDecoration: "none" }}
+                                        >
+                                            {formatWithIMask(item.numero, "phone")}
+                                        </Link>
+                                    </Box>
+                                );
+                            } else {
+                                return (
+                                    <Box key={index} sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <CellPhone />
+                                        <Typography component="p" variant="body2">
+                                            {formatWithIMask(item.numero, "phone")}
+                                        </Typography>
+                                    </Box>
+                                );
+                            }
+                        })}
+
                     </Box>
-                    <Box sx={{ ...flexColumn, alignItems: 'flex-start', mb: 1 }}>
+                    <Box sx={{ ...flexColumn, alignItems: 'flex-start', mb: 1, gap: '5px' }}>
                         <Typography component="span" variant="body2" color="primary">
                             Email:
                         </Typography>
-                        <Typography component="span" variant="body1" dangerouslySetInnerHTML={{ __html: section.data.email }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <EmailContacto />
+                            <Link
+                                href={`mailto:${section &&  section.data.email}`}
+                                underline="hover"
+                                sx={{ color: 'primary.main', fontWeight: 500 }}
+                            >
+                                {section &&  section.data.email}
+                            </Link>
+                        </Box>
                     </Box>
                 </Box>
             </Box>

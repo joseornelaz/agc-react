@@ -1,6 +1,6 @@
 import React from "react";
 import type { Notificaciones } from "@constants";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MarkReadNotification } from "../../../services/NotificacionesService";
 import { Box, LinearProgress, useMediaQuery, useTheme } from "@mui/material";
 
@@ -9,6 +9,8 @@ import ThumbsUpDownOutlinedIcon from '@mui/icons-material/ThumbsUpDownOutlined';
 import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
 import { Typography } from "../../atoms/Typography/Typography";
 import { tiempoTranscurrido } from "../../../utils/Helpers";
+import { NOTIFICATIONS_ENDPOINTS } from "../../../types/endpoints";
+import { useNavigate } from "react-router-dom";
 
 type NotificacionProps = {
     item: Notificaciones;
@@ -21,6 +23,8 @@ type NotificacionProps = {
 export const CardNotification: React.FC<NotificacionProps> = ({ item, index, loadingItems, setLoadingItems, setMarkedRead }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const startLoading = (id: number) => {
         setLoadingItems(prev => new Set(prev).add(id));
@@ -33,6 +37,7 @@ export const CardNotification: React.FC<NotificacionProps> = ({ item, index, loa
         startLoading(id);
         try {
             await createMutation.mutateAsync(id);
+            await queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_ENDPOINTS.GET_NOTIFICATIONS_TOP_BAR.key] });
             setMarkedRead(id);
             goTo(item);
         } catch (error) {
@@ -60,9 +65,24 @@ export const CardNotification: React.FC<NotificacionProps> = ({ item, index, loa
 
     const MarkedRead = () => ({ color: theme.palette.grey[100] })
 
-    const goTo = (item: Notificaciones) => {
-        console.log(item);
+    const goTo = (_item: Notificaciones) => {
+        //console.log(item);
         //FALTA NAVEGAR
+
+        if (_item.enlace_accion) {
+            const enlaceAccion = item.enlace_accion.split("$")[0];
+            const params = item.enlace_accion.split("$")[1];
+
+            if (params?.includes("tab=")) {
+                const tabIndex = parseInt(params.split("tab=")[1], 10);
+                navigate(`${enlaceAccion}`, { state: { tab: tabIndex } });
+            } else {
+                console.log("Navegar a:", _item.enlace_accion);
+                navigate(_item.enlace_accion);
+            }
+        }
+
+        
     }
 
     return (
@@ -71,7 +91,8 @@ export const CardNotification: React.FC<NotificacionProps> = ({ item, index, loa
             <Box onClick={() => item.leida === 0 ? handleNotifications(item) : goTo(item)}
                 sx={[{
                     width: isMobile ? '350px' : '100%',
-                    height: '138px',
+                    // height: '138px',
+                    height: 'auto',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '25px',
@@ -85,14 +106,14 @@ export const CardNotification: React.FC<NotificacionProps> = ({ item, index, loa
                 <Box sx={{ pl: 1 }}>
                     {IconsNotification(item)}
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px'}}>
                     <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <Typography component="span" variant="body2" color="primary" >{item.titulo}</Typography>
+                        <Typography component="span" variant="h5" color="primary" >{item.titulo}</Typography>
                         {
                             item.leida === 0 && <Box sx={{ width: '8px', height: '8px', borderRadius: '100px', backgroundColor: '#1976D2' }}></Box>
                         }
                     </Box>
-                    <Typography component="span" variant="body1">{item.mensaje}</Typography>
+                    <Box dangerouslySetInnerHTML={{ __html: item.mensaje }}/>
                     <Typography component="span" variant="body1" sxProps={{ color: theme.palette.grey[100] }}>{tiempoTranscurrido(item.fecha_envio)}</Typography>
                 </Box>
             </Box>

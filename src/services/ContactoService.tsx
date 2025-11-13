@@ -10,12 +10,13 @@ export const useGetContacto = (id_plan_estudios: number) => {
         queryKey: [CONTACTO_ENDPOINTS.GET_CONTACTO.key, id_plan_estudios],
         queryFn: async () => await apiClient.get<ContactoResponse>(`${CONTACTO_ENDPOINTS.GET_CONTACTO.path}?id_plan_estudio=${id_plan_estudios}&principal=1`),
         staleTime: 1000 * 60 * 5, // 5 minutos de stale time
+        enabled: id_plan_estudios !== undefined && id_plan_estudios !== null && id_plan_estudios > 0,
     });
 
     const mapData = (data: Contacto[]) => {
         return {
-            telefono: data.filter((item) => item.id_tipo_contacto === 1).map((item) => formatWithIMask(item.valor_contacto, "phone")),
-            email: data.filter((item) => item.id_tipo_contacto === 2).map((item) => item.valor_contacto)
+            telefono: data.filter((item) => item.id_tipo_contacto === 1),
+            email: data.filter((item) => item.id_tipo_contacto === 2)
         };
     }
 
@@ -29,17 +30,26 @@ export const useGetContacto = (id_plan_estudios: number) => {
 }
 
 export const useContactoInterno = (id_plan_estudios: number) => {
+    const url = `${CONTACTO_ENDPOINTS.GET_CONTACTO_INTERNO.path}?id_plan_estudio=${id_plan_estudios}&principal=0`;
     const query = useQuery<ContactoInternoResponse, Error>({
         queryKey: [CONTACTO_ENDPOINTS.GET_CONTACTO_INTERNO.key],
-        queryFn: async () => await apiClient.get<ContactoInternoResponse>(`${CONTACTO_ENDPOINTS.GET_CONTACTO_INTERNO.path}?id_plan_estudio=${id_plan_estudios}&principal=0`),
+        queryFn: async () => await apiClient.get<ContactoInternoResponse>(url),
         staleTime: 1000 * 60 * 5, // 5 minutos de stale time
+        enabled: id_plan_estudios !== undefined && id_plan_estudios !== null && id_plan_estudios > 0,
     });
 
     const mapData = (data: ContactoInterno[]) => {
 
         const transformedData = Object.values(
             data.reduce<Record<number, ContactoData>>((acc, currentItem) => {
-                const { id_seccion_contacto, nombre_seccion, descripcion_seccion, id_tipo_contacto, valor_contacto } = currentItem;
+                const {
+                    id_seccion_contacto,
+                    nombre_seccion,
+                    descripcion_seccion,
+                    id_tipo_contacto,
+                    valor_contacto,
+                    descripcion,
+                } = currentItem;
 
                 if (!acc[id_seccion_contacto]) {
                     acc[id_seccion_contacto] = {
@@ -49,30 +59,36 @@ export const useContactoInterno = (id_plan_estudios: number) => {
                         data: {
                             description: descripcion_seccion,
                             horarios: null,
-                            telefonos: null,
+                            telefonos: [], 
                             email: null,
-                        },
+                            tipo: null
+                        }
                     };
                 }
 
                 switch (id_tipo_contacto) {
-                    case 1:
-                        acc[id_seccion_contacto].data.telefonos = formatWithIMask(valor_contacto, 'phone'); 
+                    case 1: // teléfonos
+                        acc[id_seccion_contacto].data.telefonos!.push({
+                            numero: formatWithIMask(valor_contacto, 'phone'),
+                            tipo: descripcion,
+                            url_contacto: currentItem.url_contacto
+                        });
                         break;
-                    case 2:
+                    case 2: // email
                         acc[id_seccion_contacto].data.email = valor_contacto;
                         break;
-                    case 3:
+                    case 3: // horarios
                         acc[id_seccion_contacto].data.horarios = valor_contacto;
                         break;
                     default:
-                        // Handle other types if necessary
+                        
                         break;
                 }
 
                 return acc;
             }, {})
         );
+
 
         return transformedData;
     };

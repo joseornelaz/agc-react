@@ -10,6 +10,7 @@ import { Document } from "../../../assets/icons";
 
 import { TituloIcon } from "../../molecules/TituloIcon/TituloIcon";
 import { useGetPreguntasFrecuentes } from "../../../services/FaqsService";
+import { loadConfig } from "../../../config/configStorage";
 
 const PreguntasFrecuentes: React.FC = () => {
   const theme = useTheme();
@@ -17,7 +18,15 @@ const PreguntasFrecuentes: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data, isLoading } = useGetPreguntasFrecuentes(1); 
+  const [config, setConfig] = React.useState<any>(null);
+  
+  React.useEffect(() => {
+      loadConfig().then(cfg => {
+          setConfig(cfg);
+      });
+  }, []);
+
+  const { data, isLoading } = useGetPreguntasFrecuentes(config?.data?.id_plan_estudio); 
 
   const [isExternal, setIsExternal] = React.useState(true);
   
@@ -27,7 +36,15 @@ const PreguntasFrecuentes: React.FC = () => {
   
   const onBack = () => navigate(isExternal ? "/" : AppRoutingPaths.HOME);
 
+  const getTitleDivider = (grupo: string) => {
+    switch (config?.data?.id_plan_estudio) { 
+      case 17: return undefined;
+      default: return grupo;
+    }
+  }
+
   return (
+    config &&
     <Container maxWidth={isMobile ? 'xs' : 'lg' } sx={{ pt: 7, pb: 7 }}>
       <TopBar isExternal onBack={onBack} titleScreen={isMobile ? TitleScreen.PREGUNTAS_FRECUENTES : TitleScreen.BACK_HOME_EXT}  />
       {
@@ -41,7 +58,7 @@ const PreguntasFrecuentes: React.FC = () => {
           !isLoading ?
             Object.entries(data).map(([grupo, preguntas], index) =>
               (
-                <AccordionPregunta titleDivider={grupo} preguntas={preguntas} key={index} />
+                <AccordionPregunta titleDivider={getTitleDivider(grupo)} preguntas={preguntas} key={index} />
               )  
             )
           :

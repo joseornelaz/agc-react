@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Box, Tab, Tabs, tabsClasses } from "@mui/material";
 import { toRoman } from "../../../utils/Helpers";
+import { usePlanEstudio } from "../../../context/PlanEstudioContext";
 
 type PeriodosTabsProps = {
     periodos: number;
@@ -9,6 +10,7 @@ type PeriodosTabsProps = {
 }
 
 const PeriodosTabs: React.FC<PeriodosTabsProps> = ({periodos, tabSelected = 0, tabChange}) => {
+    const { config: configPlanEstudio } = usePlanEstudio();
     const [value, setValue] = React.useState(0);
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -20,7 +22,11 @@ const PeriodosTabs: React.FC<PeriodosTabsProps> = ({periodos, tabSelected = 0, t
     useEffect(() => {
         setValue(tabSelected);
     }, [tabSelected]);
-    
+
+    const getLabel = (index: number) => {
+        return configPlanEstudio?.getLabelPeriodosTabs(`Periodo ${toRoman(index + 1)}`);
+    }
+
     return(
         <Box sx={{ width: "100%" }}>
             <Tabs
@@ -39,7 +45,7 @@ const PeriodosTabs: React.FC<PeriodosTabsProps> = ({periodos, tabSelected = 0, t
                 {
                     Array.from({length: periodos}).map((_, i) => (
                         <Tab
-                            label={`Periodo ${toRoman(i + 1)}`}
+                            label={getLabel(i)}
                             value={i}
                             key={i}
                             sx={{ minWidth: '108px', padding: '0px' }}

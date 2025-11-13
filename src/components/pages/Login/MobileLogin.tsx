@@ -17,11 +17,13 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { AppRoutingPaths } from "@constants";
 import { ChangePasswordDialog } from "../../molecules/Dialogs/ChangePasswordDialog/ChangePasswordDialog";
 import { loadConfig } from "../../../config/configStorage";
+import { usePlanEstudio } from "../../../context/PlanEstudioContext";
 
 interface AccessLoginItem {
     id: string;
     icon: any;
     label: string;
+    isDisabled: boolean;
     action?: () => void;
 }
 
@@ -37,8 +39,10 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
     const [captchaValido, setCaptchaValido] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [userName, setUserName] = useState("");
-    // const nombrePlataforma = localStorage.getItem("programa") || "";
     const [config, setConfig] = React.useState<any>(null);
+    const { config: configPlanEstudio } = usePlanEstudio();
+
+    const CAPTCHA = import.meta.env.VITE_APP_CAPTCHA;
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,7 +57,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
         loadConfig().then(cfg => {
             setConfig(cfg);
         });
-    },[]);
+    }, []);
 
     const onSubmit = async (data: LoginFormData) => {
 
@@ -66,18 +70,26 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
         const result = await login(data.username, data.password);
         // enviar formulario
         if (result.success) {
-            if(result.aceptoTerminos)
-                navigate(AppRoutingPaths.PLAN_ESTUDIOS);
+            if (result.aceptoTerminos)
+                goToPage();
             else
                 navigate(AppRoutingPaths.TERMINOS_CONDICIONES);
         } else {
-            if(result.cambiarPassword) {
+            if (result.cambiarPassword) {
                 setShowChangePassword(true);
-            }else{
+            } else {
                 showNotification(result.message ?? "Ocurrió un error inesperado", "warning");
             }
         }
     };
+
+    const goToPage = () => {
+        if(configPlanEstudio) navigate(configPlanEstudio.goToPageTerminosCondiciones(AppRoutingPaths.PLAN_ESTUDIOS));
+    }
+
+    const goToResetPass = () => {
+        navigate(AppRoutingPaths.PASSWORD_RESET);
+    }
 
     const onCaptchaChange = () => {
         setCaptchaValido(true);
@@ -87,7 +99,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
         <>
             <Box
                 sx={{
-                    marginTop: 2,
+                    marginTop: 0.5,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -98,8 +110,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                     src={config?.data.logo_url || Logo}
                     alt="AG College Logo"
                     sx={{
-                        mt: 4,
-                        mb: '49px'
+                        mb: 2,
                     }}
                 />
 
@@ -121,10 +132,9 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                         fontSize: '20px'
                     }}
                 >
-                    { config?.data.nombre_plan || '' }
+                    {config?.data.nombre_plan || ''}
                 </Typography>
                 <Typography
-                    
                     component="p"
                     variant="body2"
                     sx={{
@@ -148,6 +158,7 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                                 handleSubmit(onSubmit)();
                             }
                         }}
+                        sx={{mb: 0}}
                     />
                     <TextField
                         label="Contraseña"
@@ -179,10 +190,25 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                                 handleSubmit(onSubmit)();
                             }
                         }}
+                        sx={{mb: 0}}
                     />
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+
+                    <Typography
+                        component="p"
+                        variant="body2"
+                        color='primary.main'
+                        sx={{
+                            textAlign: 'center',
+                            cursor:'pointer'
+                        }}
+                        onClick={goToResetPass}
+                    >
+                        He olvidado mi contraseña
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
                         <ReCAPTCHA
-                            sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                            sitekey={CAPTCHA}
                             onChange={onCaptchaChange}
                         />
                     </Box>
@@ -190,22 +216,33 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
                         fullWidth
                         onClick={handleSubmit(onSubmit)}
                         sxProps={{
-                            mb: '30px',
+                            mb: '12px',
                             py: 1.5,
                         }}
                         isLoading={isLoading}
                     >
                         INGRESAR
                     </Button>
-                    <Grid container spacing={2}>
-                        {
-                            accessLogin.map((access) => (
-                                <Grid size={{ xs: 6, sm: 6 }} key={access.id}>
-                                    <IconLabel icon={access.icon} label={access.label} key={access.id} action={access.action} />
-                                </Grid>
-                            ))
-                        }
-                    </Grid>
+                    {
+                        accessLogin.length > 0 && (
+                            <Grid container spacing={2}>
+                                {
+                                    accessLogin.map((access) => (
+                                        <Grid size={{ xs: 6, sm: 6 }} key={access.id}>
+                                            <IconLabel
+                                                key={access.id}
+                                                icon={access.icon}
+                                                label={access.label}
+                                                isDisabled={access.isDisabled}
+                                                action={access.action}
+                                            />
+                                        </Grid>
+                                    ))
+                                }
+                            </Grid>
+                        )
+                    }
+
                 </Box>
             </Box>
 

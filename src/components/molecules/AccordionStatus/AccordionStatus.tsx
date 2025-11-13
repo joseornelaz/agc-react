@@ -13,8 +13,8 @@ type StatusAccordionProps = {
 export const AccordionStatus: React.FC<StatusAccordionProps> = ({ tittle, status, sxProps }) => {
     return (
         <>
-            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', ...sxProps }}>
-                <Typography component="span" variant="subtitle1">
+            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', ...sxProps }}>
+                <Typography component="span" variant="subtitle1" sxProps={{ fontWeight: 600 }}>
                     {tittle}
                 </Typography>
                 <Box sx={{ pr: 2, display: 'flex', justifyContent: 'flex-start' }}>

@@ -37,7 +37,9 @@ export const AppRoutingPaths = {
     CONSEJERIAINFO: "/consejeria-informacion",
     NOTIFICACIONES: "/notificaciones",
     SESSION_EXPIRED: "/expired",
-
+    PASSWORD_RESET: "/reset-password",
+    LOGROS: "/Logros",
+    
 } as const;
 
 export type AppRoutingPaths = typeof AppRoutingPaths;
@@ -47,7 +49,8 @@ export const TitleScreen = {
     BIBLIOTECA: "Biblioteca",
     BIBLIOTECA_VIRTUAL: "Biblioteca virtual",
     CALENDARIO: "Calendario",
-    CALIFICACIONES: "Calificaciones",
+    CALIFICACIONES: "Mis Resultados",
+    SEGUIMIENTO: "Seguimiento",
     CURSOS_ACTIVOS: "Cursos Activos",
     CURSOS_CERTIFICACIONES: "Cursos y certificaciones",
     HOME: "Inicio",
@@ -58,7 +61,7 @@ export const TitleScreen = {
     VIDEOS_LECTURAS: "Videos y Lecturas de interés",
     SERVICIOS_ESCOLORES: "Servicios Escolares",
     CONTACTO: "Contacto",
-    MANUAL_INDUCCION: "Manual de inducción",
+    MANUAL_INDUCCION: "Inducción",
     LINEAMIENTOS: "Lineamientos",
     FAQS: "Faqs",
     BACK_HOME_EXT: "Regresar a inicio",
@@ -71,7 +74,8 @@ export const TitleScreen = {
     MI_TRAYECTO: "Mi Trayecto",
     APRENDE_MAS: "Aprende Más",
     TERMINOS_CONDICIONES: "Términos y Condiciones",
-    MANUALES_USUARIOS: "Manuales de Usuario",
+    MANUALES_USUARIOS: "Inducción",
+    LOGROS: "Mis Logros",
 }
 
 export type TitleScreen = typeof TitleScreen;

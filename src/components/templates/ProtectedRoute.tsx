@@ -5,12 +5,15 @@ import { useAuth } from '../../hooks';
 import { AppRoutingPaths } from '@constants';
 import { apiClient } from '../../services/ApiConfiguration/httpClient';
 import { LoadingCircular } from '../molecules/LoadingCircular/LoadingCircular';
+import { removeAvatarScript } from '../../utils/Helpers';
+
 
 export const ProtectedRoute: React.FC = () => {
     const { isAuthenticated, isInitializing, isTokenExpired, isLogout, aceptoTerminos } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    
+
+
     const handleUnauthorized = React.useCallback(() => {
         navigate(AppRoutingPaths.SESSION_EXPIRED, { state: { from: location }, replace: true });
     }, [navigate, location]);
@@ -21,13 +24,13 @@ export const ProtectedRoute: React.FC = () => {
             unsubscribe();
         };
     }, [handleUnauthorized]);
-    
 
     if (isInitializing) {
         return <LoadingCircular Text="" />;
     }
 
     if (isLogout) {
+        removeAvatarScript();
         return (
             <Navigate
                 to={"/"}
@@ -36,8 +39,9 @@ export const ProtectedRoute: React.FC = () => {
             />
         );
     }
-    
+
     if (!isAuthenticated && !isTokenExpired) {
+        removeAvatarScript();
         return (
             <Navigate
                 to={"/"}
@@ -46,8 +50,9 @@ export const ProtectedRoute: React.FC = () => {
             />
         );
     }
-    
+
     if (isTokenExpired) {
+        removeAvatarScript();
         return (
             <Navigate
                 to={AppRoutingPaths.SESSION_EXPIRED}
@@ -56,8 +61,8 @@ export const ProtectedRoute: React.FC = () => {
             />
         );
     }
-    
-    if(!aceptoTerminos) {
+
+    if (!aceptoTerminos) {
         return <Navigate to={AppRoutingPaths.TERMINOS_CONDICIONES} state={{ from: location }} replace />;
     }
 

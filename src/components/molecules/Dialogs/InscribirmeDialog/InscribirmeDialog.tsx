@@ -5,10 +5,11 @@ import { Dialog } from "../../../atoms/Dialog/Dialog";
 import { Avatar } from "../../../atoms/Avatar/Avatar";
 import { Typography } from "../../../atoms/Typography/Typography";
 import check_circle from "../../../../assets/check_circle.png";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useCreateConfirmar } from "../../../../services/PlanEstudioService";
-import { PLAN_ESTUDIO_ENDPOINTS } from "../../../../types/endpoints";
 import { useNotification } from "../../../../providers/NotificationProvider";
+
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 type DialogProps = {
     idCurso: number;
@@ -17,10 +18,11 @@ type DialogProps = {
 }
 
 export const InscribirmeDialog: React.FC<DialogProps> = ({idCurso, isOpen, close}) => {
-    const queryClient = useQueryClient();
     const { showNotification } = useNotification();
     const [open, setOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
+    const [hasError, setHasError] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState('');
 
     useEffect(() => {
         setOpen(isOpen ?? false);
@@ -28,7 +30,9 @@ export const InscribirmeDialog: React.FC<DialogProps> = ({idCurso, isOpen, close
 
     const handleClose = () => {
         setOpen(false);
-        close(false); 
+        close(false);
+        setHasError(false);
+        setErrorMessage("");
     };
 
     const handleConfirmar = () => {
@@ -38,20 +42,16 @@ export const InscribirmeDialog: React.FC<DialogProps> = ({idCurso, isOpen, close
 
     const createMutation = useMutation({
         mutationFn: useCreateConfirmar,
-        onSuccess: async () => {
-            
-            await queryClient.invalidateQueries({
-                queryKey: [PLAN_ESTUDIO_ENDPOINTS.GET_MATERIAS.key],
-            });
-            
-            showNotification(`Se inscribio satisfactorimente al curso`,"success");
+        onSuccess: () => {
+            showNotification(`Se inscribio satisfactoriamente al curso`,"success");
             setLoading(false);
             setOpen(false);
             close(true);
         },
-        onError: (error) => {
-            showNotification(`Error al registrar: ${error.message}`, "error");
+        onError: (error : any) => {
+            setErrorMessage(error?.response?.data?.message ?? "Ocurrió un error inesperado");
             setLoading(false);
+            setHasError(true);
         },
         onSettled: () => {
             console.log('La mutación ha finalizado');
@@ -62,20 +62,37 @@ export const InscribirmeDialog: React.FC<DialogProps> = ({idCurso, isOpen, close
         <Dialog isOpen={open} sxProps={{ margin: '5px', width: '350px', height: '342px'}} >
             <DialogContent>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px', flexDirection: 'column'}}>
-                    <Avatar src={check_circle} width={150} height={150} />
-                    <Typography component="h3" variant="h3" color="primary">¿Deseas Inscribirte?</Typography>
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%'}}>
-                        <>
-                            <Button onClick={handleConfirmar} fullWidth isLoading={loading}>
-                                Confirmar
-                            </Button>
-                        </>
-                        <>
-                            <Button onClick={handleClose} fullWidth variant="outlined" color="primary" disabled={loading}>
-                                Cancelar
-                            </Button>
-                        </>
-                    </Box>
+                    {
+                        !hasError
+                        ?
+                            <>
+                                <Avatar src={check_circle} width={150} height={150} />
+                                <Typography component="h3" variant="h3" color="primary">¿Deseas Inscribirte?</Typography>
+                                <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%'}}>
+                                    <>
+                                        <Button onClick={handleConfirmar} fullWidth isLoading={loading}>
+                                            Confirmar
+                                        </Button>
+                                    </>
+                                    <>
+                                        <Button onClick={handleClose} fullWidth variant="outlined" color="primary" disabled={loading}>
+                                            Cancelar
+                                        </Button>
+                                    </>
+                                </Box>
+                            </>
+                        :
+                            <>
+                                <WarningAmberOutlinedIcon sx={{ fontSize: '96px', color: '#D9A514' }} />
+                                <Typography component="h5" variant="h5" color="primary" sxProps={{textAlign: 'center'}}>{errorMessage}</Typography>
+                                <Box sx={{width: '100%'}}>
+                                    <Button onClick={handleClose} fullWidth>
+                                        Aceptar
+                                    </Button>
+                                </Box>
+                            </>
+                    }
+                    
                 </Box>
             </DialogContent>
         </Dialog>

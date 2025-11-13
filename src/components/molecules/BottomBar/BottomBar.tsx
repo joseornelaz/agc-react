@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import { MobileMenu } from "../Menu/MobileMenu/MobileMenu";
 import { useNavigate } from "react-router-dom";
 import { AppRoutingPaths, type MenuType } from "@constants";
+import { usePlanEstudio } from "../../../context/PlanEstudioContext";
 
 export const BottomBar: React.FC = () => {
     const navigate = useNavigate();
+    const { config: configPlanEstudio } = usePlanEstudio();
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [menuType, setMenuType] = useState<MenuType>("menuRoutes");
-
+  
     const handleMenuClick = (event: React.MouseEvent<HTMLElement>, menuType: MenuType) => {
         setMenuType(menuType);
         setAnchorEl(event.currentTarget);
@@ -23,6 +24,16 @@ export const BottomBar: React.FC = () => {
     };
 
     const handleHome = () => navigate(AppRoutingPaths.PLAN_ESTUDIOS);
+
+    const showHideIcons = () => {
+      return configPlanEstudio?.renderConditionalComponent(
+        'BottomBar',
+        <BottomNavigationAction 
+          icon={<HomeOutlinedIcon />} 
+          onClick={handleHome}
+        />
+      );
+    }
 
   return (
     <React.Fragment>
@@ -36,17 +47,16 @@ export const BottomBar: React.FC = () => {
               zIndex: 1
             }}
         >
-            <BottomNavigationAction 
-              icon={<HomeOutlinedIcon />} 
-              onClick={handleHome}
-            />
+            {
+              showHideIcons()
+            }
             <BottomNavigationAction 
               icon={<AddCircleOutlineIcon color="primary" sx={{ fontSize: 40 }} />}
               onClick={(event) => handleMenuClick(event, "menuRoutes")}
             />
             <BottomNavigationAction 
-              icon={<MoreVertIcon />} 
-              onClick={(event) => handleMenuClick(event, "menuInformacion")}
+              sx={{ visibility: 'hidden' }} 
+              disabled 
             />
         </BottomNavigation>
         <MobileMenu anchorEl={anchorEl} onClose={handleMenuClose} menuType={menuType} />

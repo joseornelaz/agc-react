@@ -4,6 +4,8 @@ import { useAuthLogin as loginApi, useLogout as logoutApi, useAuthNewPassword, u
 import type { User } from '@constants';
 import { checkAuthStatus, cleanStorage, setAuthModel, getAuthModel, setToken } from '../hooks/useLocalStorage';
 import { encryptData } from '../utils/crypto';
+import type { ConfigPlataforma } from '../types/ConfigPlataforma.interface';
+import { loadConfig } from '../config/configStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -13,12 +15,16 @@ interface AuthContextType {
   isInitializing: boolean;
   isTokenExpired: boolean;
   isLogout: boolean;
+  aceptoTerminos: boolean;
+  configPlataforma: ConfigPlataforma | null;
+  videoVisto: number;
   clearError: () => void;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string; cambiarPassword?: boolean; aceptoTerminos?: boolean }>;
   logout: () => Promise<void>;
   setUser: (user: User) => void;
   newPassword: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  aceptoTerminos: boolean;
+  setAceptoTerminos?: (acepto: boolean) => void;
+  SetVideoVisto?:(acepto: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,16 +34,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isInitializing, setIsInitializing] = useState(true);
     const [isTokenExpired, setIsTokenExpired] = useState(false);
     const [aceptoTerminos, setAceptoTerminos] = useState(true);
+    const [videoVisto, SetVideoVisto] = useState(0);
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isLogout, setIsLogout] = useState(false);
     const [_nombrePrograma, setNombrePrograma] = useState("");
+    const [configPlataforma, setConfigPlataforma] = useState<ConfigPlataforma | null>(null);
 
     const { refetch } = useGetPerfilUsuario("Login", { enabled: false });
 
     const queryClient = useQueryClient();
     
+    useEffect(() => {
+        loadConfig().then((cfg) => {
+          setConfigPlataforma(cfg.data || null);
+        });
+    }, []);
+
     // Verificar autenticación al montar el componente
     useEffect(() => {
         const checkAuth = async () => {
@@ -52,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setUser(userData);
                     setAceptoTerminos(userData?.aceptoTerminos);
                     setNombrePrograma(userData.nombrePrograma);
+                    SetVideoVisto(userData.videoVisto)
                 }
             } catch (error) {
                 console.error("Error checking auth:", error);
@@ -85,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsLogout(true);
             setIsAuthenticated(false);
             setIsTokenExpired(false);
+            setAceptoTerminos(true);
             queryClient.clear();
         }
     });
@@ -104,16 +120,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (response?.token) {
+                const aceptoTerminosValue = response?.acepto_terminos
                 setToken(response?.token);
-                setAceptoTerminos(response?.acepto_terminos);     
-                setNombrePrograma(response?.programa);           
+                setAceptoTerminos(aceptoTerminosValue);
+                setNombrePrograma(response?.programa);         
+                SetVideoVisto(response?.video_visto)  
                 
-                await procesarPerfil(response?.acepto_terminos, response?.programa);
+                await procesarPerfil(response?.acepto_terminos, response?.programa, response?.video_visto);
 
                 setIsAuthenticated(true);                
                 setIsLoading(false);
                 
-                return { success: true, data: null, cambiarPassword: false, aceptoTerminos: aceptoTerminos };
+                return { success: true, data: null, cambiarPassword: false, aceptoTerminos: aceptoTerminosValue };
             } else {
                 setIsLoading(false);
                 const errorMessage = response?.message || 'Autenticación fallida';
@@ -143,11 +161,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             queryClient.invalidateQueries({ queryKey: ['currentUser']});
 
             if (response?.token) {
+                const aceptoTerminosValue = response?.acepto_terminos ?? false;
                 setToken(response?.token);
-                setAceptoTerminos(response?.acepto_terminos);     
-                setNombrePrograma(response?.programa);           
+                setAceptoTerminos(aceptoTerminosValue);     
+                setNombrePrograma(response?.programa); 
+                SetVideoVisto(response.video_visto)          
                 
-                await procesarPerfil(response?.acepto_terminos, response?.programa);
+                await procesarPerfil(response?.acepto_terminos, response?.programa, response.video_visto);
                 
                 setIsAuthenticated(true);
                 setIsLoading(false);
@@ -169,12 +189,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }
 
-    const procesarPerfil = async(aceptoTerminos: boolean | undefined, programa: string | undefined) => {
+    const procesarPerfil = async(pAceptoTerminos: boolean | undefined, programa: string | undefined , videoBienvenida: number | undefined) => {
         const perfil = await refetch();
 
         if (perfil.data) {
             const datos = perfil.data.data;
             
+            const aceptoTerminosValue = pAceptoTerminos;
+            const video = videoBienvenida;
+
             const auth = {
                 name: `${datos.nombre} ${datos.apellido_paterno} ${datos.apellido_materno}`,
                 email: datos.correo,
@@ -182,13 +205,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 city: datos.nombre_ciudad,
                 phone: datos.telefonos?.find((item) => item.tipo === "Celular")?.numero ?? "0000000000",
                 perfil: datos,
-                aceptoTerminos: aceptoTerminos,
+                aceptoTerminos: aceptoTerminosValue,
+                videoVisto: video,
                 nombrePrograma: programa,
             };
 
-            localStorage.setItem("programa", programa ?? "");
-
             setUser(auth);
+
+            setAceptoTerminos(aceptoTerminosValue ?? false);
+            SetVideoVisto(video ?? 0)
 
             const encry = await encryptData(auth);
             setAuthModel(encry);
@@ -197,6 +222,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const handleAceptoTerminos = async (acepto: boolean) => {
+        setAceptoTerminos(acepto);
+        if (user) {
+            const updatedUser = { ...user, aceptoTerminos: acepto };
+            setUser(updatedUser);
+            const encry = await encryptData(updatedUser);
+            setAuthModel(encry);
+        }
+    }
+
+    const handleVideoVisto = async (visto: number) => {
+        SetVideoVisto(visto);
+        if (user) {
+            const updatedUser = { ...user, videoVisto: visto };
+            setUser(updatedUser);
+            const encry = await encryptData(updatedUser);
+            setAuthModel(encry);
+        }
+    }
 
     const handleLogout = async () => {
         setIsLogout(true);
@@ -215,7 +259,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
         setError(null);
         setIsTokenExpired(false);   
-        setIsLogout(false);     
+        setIsLogout(false);
+        setAceptoTerminos(true);
     }
 
     const value = {
@@ -227,11 +272,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isTokenExpired,
         isLogout,
         aceptoTerminos,
+        configPlataforma,
+        videoVisto,
         login: handleLogin,
         logout: handleLogout,
         clearError,
         setUser,
         newPassword: handleNewPassword,
+        setAceptoTerminos: handleAceptoTerminos,
+        SetVideoVisto : handleVideoVisto
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

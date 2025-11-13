@@ -10,23 +10,26 @@ import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import { VideoBienvenidaDialog } from "../../molecules/Dialogs/VideoBienvenidaDialog/VideoBienvenidaDialog";
 import { InscribirmeDialog } from "../../molecules/Dialogs/InscribirmeDialog/InscribirmeDialog";
 import { ContainerDesktop } from "../../organisms/ContainerDesktop/ContainerDesktop";
-import { useGetVideoMapa, useGetPlanEstudio } from "../../../services/PlanEstudioService";
+import { useDatosModulos, useGetPlanEstudio } from "../../../services/PlanEstudioService";
 import { toRoman } from "../../../utils/Helpers";
 import type { Materia, PlanEstudioMateriasResponse } from "../../../types/plan-estudio.interface";
 import PeriodosTabs from "../../molecules/PeriodosTabs/PeriodosTabs";
 import { LoadingCircular } from "../../molecules/LoadingCircular/LoadingCircular";
 import { getTabSelected, setCursoSelected, setTabSelected } from "../../../hooks/useLocalStorage";
+import type { Documento } from "../../../types/Documentos.interface";
+import { ManualsButton } from "../../molecules/ManualsButton/ManualsButton";
 
 const PlanEstudio: React.FC = () => {
-    const navigate = useNavigate();
     const theme = useTheme();
+    const navigate = useNavigate();
+
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const betweenDevice = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     const { refetchMapeado } = useGetPlanEstudio({ enabled: false });
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const { mapaCurricular, video, dataModulo: planEstudioData } = useGetVideoMapa();
+    const { dataModulo: planEstudioData } = useDatosModulos();
     const [materiaData, setMateriaData] = React.useState<PlanEstudioMateriasResponse[]>([]);
 
     const [isOpenVideo, setIsOpenVideo] = React.useState(false);
@@ -63,8 +66,8 @@ const PlanEstudio: React.FC = () => {
         fetchData();
     }, []);
 
-    const handleVideoBienvenida = () => {
-        setUrlVideo(video.data?.url ?? "");
+    const handleVideoBienvenida = (manual: Documento) => {
+        setUrlVideo(manual.url_archivo ?? "");
         setIsOpenVideo(true);
     }
 
@@ -78,12 +81,14 @@ const PlanEstudio: React.FC = () => {
         }
     }
 
-    const handleMapaCurricular = () => {
-        if (mapaCurricular) window.open(mapaCurricular.data?.url, "_blank");
-    };
-
-    const handleConfirmar = (_isConfirmar: boolean) => {
-        setIsOpenInscribirmeDialog(false);
+    const handleConfirmar = async (isConfirmar: boolean) => {
+        if(isConfirmar) {
+            const response = await refetchMapeado();
+            setMateriaData(response ?? []);
+            setIsOpenInscribirmeDialog(false);
+        }else{
+            setIsOpenInscribirmeDialog(false);
+        }
     }
 
     const InformacionStatusButtons = (materia: Materia, color: "success" | "primary" | "info" | "warning" | undefined) => (
@@ -138,18 +143,10 @@ const PlanEstudio: React.FC = () => {
     const BotonesVideoMapa = (flexDirection: string = "row") => (
         <Box sx={{ paddingTop: '32px', paddingBottom: '8px', display: 'flex', flexDirection, gap: '15px', justifyContent: 'space-between' }}>
             <>
-                <Button
-                    onClick={handleVideoBienvenida}
-                    fullWidth
-                    icon={!isMobile ? <OndemandVideoIcon /> : undefined}
-                    iconPosition={!isMobile ? "start" : undefined}
-                    disabled={video.data?.url?.length === 0}
-                >
-                    Video de Bienvenida
-                </Button>
+                <ManualsButton idTipoManual={6} icon={!isMobile ? <OndemandVideoIcon /> : undefined} onClick={handleVideoBienvenida} />
             </>
             <>
-                <Button onClick={handleMapaCurricular} disabled={mapaCurricular.data?.url?.length === 0} fullWidth variant="outlined" >Mapa Curricular</Button>
+                <ManualsButton idTipoManual={5} variant="outlined" />
             </>
         </Box >
     );

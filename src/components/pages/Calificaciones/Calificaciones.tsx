@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Grid, useMediaQuery, useTheme } from '@mui/material';
+
 import { TituloIcon } from '../../molecules/TituloIcon/TituloIcon';
 import { AppRoutingPaths, TitleScreen } from '@constants';
 import { Calificaciones as CalificacionesIcon } from "@iconsCustomizeds";
@@ -21,6 +22,9 @@ import { LoadingCircular } from '../../molecules/LoadingCircular/LoadingCircular
 import { useQueryClient } from '@tanstack/react-query';
 import { CURSOS_ACTIVOS_ENDPOINTS } from '../../../types/endpoints';
 import { getTabSelected, setCursoSelected, setTabSelected } from '../../../hooks/useLocalStorage';
+import { useGetEncuestas } from "../../../services/CursosActivosService";
+import { ReporteDialog } from '../../molecules/Dialogs/ReporteDialog/ReporteDialog';
+import { usePlanEstudio } from '../../../context/PlanEstudioContext';
 
 const Calificaciones: React.FC = () => {
     const navigate = useNavigate();
@@ -28,14 +32,23 @@ const Calificaciones: React.FC = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const betweenDevice = useMediaQuery(theme.breakpoints.between('sm', 'md'));
     const queryClient = useQueryClient();
-
+    const { data: encuestas, isLoading: loadingEncuesta } = useGetEncuestas();
     const [isOpen, setIsOpen] = React.useState(false);
-
+    const [openReporteDialog, setOpenReporteDialog] = React.useState(false);
     const { data: calificacionData, isLoading } = useGetCalificaciones();
     const { data: CalificacionesDatos } = useGetDatosModulos(ModulosCampusIds.CALIFICACIONES);
-
     const [value, setValue] = React.useState(0);
+    const [htmlResult, setHtmlResult] = React.useState('');
+    const [titulo, setTitulo] = React.useState('');
     const [tabPreviewSelected, setPreviewTabSelected] = React.useState(0);
+
+    const [calificacionesConfig, setCalificacionesConfig] = React.useState({ titulo: TitleScreen.CALIFICACIONES, loading: `Cargando ${TitleScreen.CALIFICACIONES}...`, mostrarPromedio: true, mostrarGlosario: true, mostrarPeriodos: true });
+
+    const { config: configPlanEstudio } = usePlanEstudio();
+
+    React.useEffect(() => {
+        setCalificacionesConfig(configPlanEstudio?.getConfiguracionCalificaciones(calificacionesConfig) || calificacionesConfig);
+    }, [configPlanEstudio]);
 
     const handleGlosario = () => (setIsOpen(true));
 
@@ -45,7 +58,7 @@ const Calificaciones: React.FC = () => {
     }, []);
 
     const Leyenda = (
-        <Box sx={{ ...innerHTMLStyle,pl: 0, pr: 0 }} dangerouslySetInnerHTML={{ __html: CalificacionesDatos?.data?.descripcion_html ?? '' }} />
+        <Box sx={{ ...innerHTMLStyle, pl: 0, pr: 0 }} dangerouslySetInnerHTML={{ __html: CalificacionesDatos?.data?.descripcion_html ?? '' }} />
     );
 
     const BotonVerGlosario = (variant: 'outlined' | 'contained' = 'contained') => (
@@ -57,9 +70,9 @@ const Calificaciones: React.FC = () => {
     );
 
     const handleIrCurso = (item: CalificacionCurso) => {
-        setTabSelected({tab: 'cursos-detalle', index: 0});
+        setTabSelected({ tab: 'cursos-detalle', index: 0 });
         queryClient.invalidateQueries({ queryKey: [CURSOS_ACTIVOS_ENDPOINTS.GET_CURSOS_CONTENIDO_BY_ID.key, item.id_curso, "Contenido"] });
-        
+
 
         const curso = {
             id_curso: item.id_curso,
@@ -69,9 +82,9 @@ const Calificaciones: React.FC = () => {
 
         setCursoSelected(JSON.stringify(curso));
 
-        setTimeout(() => 
+        setTimeout(() =>
             navigate(AppRoutingPaths.CURSOS_ACTIVOS_DETALLES.replace(":id", item.id_curso.toString()))
-        ,500);
+            , 500);
     };
 
     const handleTabChange = (val: number) => {
@@ -98,16 +111,53 @@ const Calificaciones: React.FC = () => {
                     <StatusIcon estado={curso.estatus_curso_alumno} />
                 </Box>
                 <Box sx={{ ...flexRows, justifyContent: 'start', gap: '5px' }}>
-                    <Typography component={"span"} variant={"body3"} color={curso.estatus_curso_alumno == 'Finalizado' ? 'success' : 'text'}>Calificación : </Typography>
-                    <Typography component={"span"} variant={"body3"} color={curso.estatus_curso_alumno == 'Finalizado' ? 'success' : 'disabled'}>{curso.estatus_curso_alumno == 'Finalizado' ? curso.calificacion : 'Pendiente'}</Typography>
+                    <Typography component={"span"} variant={"body3"} color={
+                        curso.estatus_curso_alumno === 'Finalizado'
+                            ? (Number(curso.calificacion) < 6 ? 'error' : 'success')
+                            : 'disabled'
+                    }>Calificación : </Typography>
+                    <Typography
+                        component={"span"}
+                        variant={"body3"}
+                        color={
+                            curso.estatus_curso_alumno === 'Finalizado'
+                                ? (Number(curso.calificacion) < 6 ? 'error' : 'success')
+                                : 'disabled'
+                        }
+                    >
+                        {
+                            configPlanEstudio?.getValidarCalificacion(curso)
+                        }
+                    </Typography>
                 </Box>
-
-                <Box sx={{ display: 'flex', gap: '15px' }}>
-                    <><Button onClick={() => handleDetalle(curso.id_curso)} fullWidth>Detalles Calificación</Button></>
-                    <><Button onClick={() => handleIrCurso(curso)} fullWidth>Ir al Curso</Button></>
-                </Box>
+                {
+                    (curso.estatus_curso_alumno === 'Finalizado' || curso.estatus_curso_alumno === 'Cursando') &&
+                    <Box sx={{ display: 'flex', gap: '15px' }}>
+                        {
+                            botonesCalificacion(curso)
+                        }
+                    </Box>
+                }
             </Box>
         );
+    };
+
+    const handleReporteCurso = (html_result: any, titulo: string) => {
+        setOpenReporteDialog(true);
+        setHtmlResult(html_result);
+        setTitulo(titulo);
+    }
+
+    const botonesCalificacion = (curso: CalificacionCurso) => {
+        return configPlanEstudio?.renderBotonesCalificacion({
+            curso,
+            loadingEncuesta,
+            encuestas,
+            handleIrCurso,
+            handleReporteCurso,
+            handleDetalle,
+            isMobile,
+        })
     };
 
     const promedio = () => (
@@ -137,7 +187,7 @@ const Calificaciones: React.FC = () => {
         const data = calificacionData?.cursos || [];
 
         if (isLoading) {
-            return <LoadingCircular Text="Cargando Calificaciones..." />;
+            return <LoadingCircular Text={calificacionesConfig.loading} />;
         } else {
             if (data.length > 0) {
                 if (isMobile) {
@@ -153,7 +203,7 @@ const Calificaciones: React.FC = () => {
         <Grid container>
             <Grid size={{ md: 12 }} sx={{ width: '100%' }}>
                 {
-                    TabsSection(periodos)
+                    calificacionesConfig.mostrarPeriodos ? TabsSection(periodos) : null
                 }
                 {
                     data &&
@@ -175,6 +225,10 @@ const Calificaciones: React.FC = () => {
         </Grid>
     );
 
+    const getTituloIconAccordion = (index: number) => {
+        return configPlanEstudio?.getLabelPeriodosTabs(`Periodo ${toRoman(index + 1)} - Tus materias`);
+    }
+
     const ListadoMateriasVistaDesktop = (data: any[], periodos: number[]) => (
         <Grid container>
             <Grid size={{ md: 12 }} sx={{ width: '100%' }}>
@@ -182,13 +236,13 @@ const Calificaciones: React.FC = () => {
                     !betweenDevice ?
                         <>
                             {
-                                TabsSection(periodos)
+                                calificacionesConfig.mostrarPeriodos ? TabsSection(periodos) : null
                             }
                             {
                                 periodos.map((_, i) => (
                                     <TabPanel value={value} index={i} key={i}>
                                         <Box sx={{ p: 4 }}>
-                                            <TituloIcon Titulo={`Periodo ${toRoman(i + 1)} - Tus materias`} fontSize="h3" />
+                                            <TituloIcon Titulo={getTituloIconAccordion(i)} fontSize="h3" />
                                             {
                                                 data && data.filter((item) => item.id === i).map((item, kix) => (
                                                     <Box key={kix} sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column' }}>
@@ -212,36 +266,39 @@ const Calificaciones: React.FC = () => {
         </Grid>
     );
 
+    const handleConfirmar = () => setOpenReporteDialog(false);
+
     return (
         <>
             {
                 isMobile
                     ?
                     <>
-                        <TituloIcon Titulo={TitleScreen.CALIFICACIONES} Icon={CalificacionesIcon} />
+                        <TituloIcon Titulo={calificacionesConfig.titulo} Icon={CalificacionesIcon} />
                         {Leyenda}
                         <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '30px', paddingTop: '20px' }}>
-                            {BotonVerGlosario('contained')}
-                            {promedio()}
+                            {calificacionesConfig.mostrarGlosario && BotonVerGlosario('contained')}
+                            {calificacionesConfig.mostrarPromedio && promedio()}
                             {Listado()}
                         </Box>
                     </>
                     :
                     <ContainerDesktop
-                        title={TitleScreen.CALIFICACIONES}
+                        title={calificacionesConfig.titulo}
                         description={CalificacionesDatos?.data?.descripcion_html ?? ''}
                         actions={
-                            promedio()
+                            calificacionesConfig.mostrarPromedio && promedio()
                         }
                         column1Size={9}
                         column2Size={3}
                         specialButton={
-                            BotonVerGlosario('outlined')
+                            calificacionesConfig.mostrarGlosario && BotonVerGlosario('outlined')
                         }
                     >
                         {Listado()}
                     </ContainerDesktop>
             }
+            <ReporteDialog tittle={titulo} isOpen={openReporteDialog} data={htmlResult} close={handleConfirmar} />
             <GlosarioTerminosDialog isOpen={isOpen} close={() => setIsOpen(false)} glosario={calificacionData?.glosario} />
         </>
     );

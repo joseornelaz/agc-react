@@ -2,12 +2,15 @@ export const LOGIN_ENDPOINTS = {
     POST_AUTH: { path: '/auth' },
     POST_LOGIN: { path: '/auth/login' },
     POST_LOGOUT: { path: '/auth/logout' },
+    POST_FORGOT_PASSWORD: { path: '/auth/forgot-password' },
+    POST_FORGOT_PASSWORD_CONFIRM: { path: '/auth/forgot-password/confirm' },
     POST_NEW_PASSWORD: { path: '/auth/complete-new-password' },
     GET_PLAN_ESTUDIO: { path: '/plan-estudios/perfil-programa', key: 'plan-estudio-url' },
 }
 
 export const NOTIFICATIONS_ENDPOINTS = {
     GET_NOTIFICATIONS: { path: '/notificaciones', key: 'notificaciones' },
+    GET_NOTIFICATIONS_TOP_BAR: { path: '/notificaciones', key: 'notificaciones-top-bar' },
     POST_NOTIFICATIONS: { path: '/notificaciones/read' },
     POST_READ_ALL_NOTIFICATIONS: { path: '/notificaciones/read-all' }
 }
@@ -28,7 +31,10 @@ export const CURSOS_ACTIVOS_ENDPOINTS = {
     GET_CURSOS_CONTENIDO_BY_ID: { path: '/cursos-activos/contenido', key: 'cursos-contenido-id' },
     GET_MAPA_CURRICULAR: { path: '/cursos-activos/mapa-curricular', key: 'cursos-act-mapa-curricular' },
     GET_LISTA_PROGRESO: { path: '/cursos-activos/lista-progreso', key: 'lista-progreso' },
-    POST_ACTIVIDADES: { path: '/cursos-activos/actividades/guardar' }
+    GET_ENCUESTAS_ASIGNACIONES: { path: '/encuestas/asignaciones/todas', key: 'encuestas-asignacion' },
+    SET_ENCUESTAS_ASIGNACIONES: { path: 'encuestas/asignaciones', key: 'encuestas-asignacion-guardar' },
+    POST_ACTIVIDADES: { path: '/cursos-activos/actividades/guardar' },
+    POST_VIDEO_VISTO: { path: '/video-bienvenidaview' }
 }
 
 export const CALENDARIO_ENDPOINTS = {
@@ -38,6 +44,7 @@ export const CALENDARIO_ENDPOINTS = {
 export const CALIFICACIONES_ENDPOINTS = {
     GET_CALIFICACIONES: { path: '/calificaciones', key: 'calificaciones' },
     GET_CALIFICACIONES_DETALLES: { path: '/calificaciones/curso/detalle', key: 'calificaciones_detalle' },
+    POST_CALIFICACIONES_PROMEDIAR: { path: '/calificaciones/cursos' },
 }
 
 export const MAS_INFORMACION_ENDPOINTS = {
@@ -68,6 +75,7 @@ export const AYUDA_ENDPOINTS = {
 
 export const MANUALES_ENDPOINTS = {
     GET_MANUALES: { path: '/documentos', key: 'manuales' },
+    GET_MANUALES_TODOS: { path: '/documentos/todos', key: 'manuales-todos' },
     GET_MANUALES_USUARIO: { path: '/mas-informacion/manuales-usuario', key: 'manuales-usuario' },
     GET_LINEAMIENTOS_USUARIO: { path: '/mas-informacion/lineamientos', key: 'lineamientos-usuario' }
 }

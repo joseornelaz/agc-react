@@ -5,7 +5,7 @@ import { Box, Container, FormControlLabel, FormGroup, Switch, useMediaQuery, use
 import { ContainerDesktop } from "../../organisms/ContainerDesktop/ContainerDesktop";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { terminosSchema, type TerminosFormData } from "../../../schemas/terminosCondicionesSchema";
+import { terminosSchema, type TerminosFormData } from "../../../schemas/terminosCondicionesSchema"; 
 import { useMutation } from "@tanstack/react-query";
 import { useTerminos, useGetTerminosDatos } from "../../../services/TerminosCondicionesService";
 import { useNavigate } from "react-router-dom";
@@ -15,8 +15,12 @@ import { Terminos } from "@iconsCustomizeds";
 import Button from "../../atoms/Button/Button";
 import { innerHTMLStyle } from "@styles";
 import { LoadingCircular } from "../../molecules/LoadingCircular/LoadingCircular";
+import { useAuth } from "../../../context/AuthContext";
+import { usePlanEstudio } from "../../../context/PlanEstudioContext";
 
 const TerminosCondiciones: React.FC = () => {
+    const { setAceptoTerminos } = useAuth();
+    const { config: configPlanEstudio } = usePlanEstudio();
     const theme = useTheme();
     const navigate = useNavigate();
     const { showNotification } = useNotification()
@@ -31,9 +35,7 @@ const TerminosCondiciones: React.FC = () => {
     } = useForm<TerminosFormData>({
         resolver: zodResolver(terminosSchema),
         defaultValues: {
-            aceptoTerminos: false,
             aceptoLineamientos: false,
-            aceptoAvisos: false,
         },
     });
 
@@ -41,11 +43,18 @@ const TerminosCondiciones: React.FC = () => {
         try {
             setIsLoading(true);
             await createMutation.mutateAsync({ documentos_legales: [1, 2, 3] });
-            navigate(AppRoutingPaths.PLAN_ESTUDIOS);
+            if (setAceptoTerminos) setAceptoTerminos(true);
+            goToPage();
         } catch (error) {
             showNotification("Hubo un error al registrar: " + error, "error");
             setIsLoading(false);
             console.error(error);
+        }
+    }
+
+    const goToPage = () => {
+        if (configPlanEstudio) {
+            navigate(configPlanEstudio.goToPageTerminosCondiciones(AppRoutingPaths.PLAN_ESTUDIOS));
         }
     }
 
@@ -65,22 +74,7 @@ const TerminosCondiciones: React.FC = () => {
                 {textos()}
             </Typography>
 
-            <Typography component="p" variant="h4" sxProps={{ color: theme.palette.primary.main, textAlign: isMobile ? 'center' : 'left' }}>
-                ¡Felicidades!
-                {isMobile && <br />}
-                {' has dado un gran paso en tu desarrollo profesional y personal.'}
-            </Typography>
             <FormGroup sx={{ gap: isMobile ? '32px' : '20px' }}>
-                <Controller
-                    name="aceptoTerminos"
-                    control={control}
-                    render={({ field }) => (
-                        <FormControlLabel
-                            control={<Switch {...field} checked={field.value} />}
-                            label="Acepto que he leído los Lineamientos Internos y Normas de Control Escolar."
-                        />
-                    )}
-                />
 
                 <Controller
                     name="aceptoLineamientos"
@@ -88,21 +82,11 @@ const TerminosCondiciones: React.FC = () => {
                     render={({ field }) => (
                         <FormControlLabel
                             control={<Switch {...field} checked={field.value} />}
-                            label="He leído y acepto los Términos y Condiciones de entrega de documentación física original."
+                            label="He leído y acepto los Términos y Condiciones del Servicio y el Aviso de Privacidad aplicables al Campus Digital."
                         />
                     )}
                 />
 
-                <Controller
-                    name="aceptoAvisos"
-                    control={control}
-                    render={({ field }) => (
-                        <FormControlLabel
-                            control={<Switch {...field} checked={field.value} />}
-                            label="He leído y acepto el Aviso de Privacidad de Academia Global."
-                        />
-                    )}
-                />
             </FormGroup>
             <Box sx={{ width: isMobile ? '100%' : '178px' }}>
                 <Button
