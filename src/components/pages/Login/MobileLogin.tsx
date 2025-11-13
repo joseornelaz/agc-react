@@ -62,8 +62,8 @@ export const MobileLogin: React.FC<AccessLogin> = ({ accessLogin }) => {
     const onSubmit = async (data: LoginFormData) => {
 
         if (!captchaValido) {
-            showNotification("Por favor completa el CAPTCHA", "warning");
-            return;
+            // showNotification("Por favor completa el CAPTCHA", "warning");
+            // return;
         }
 
         setUserName(data.username);
